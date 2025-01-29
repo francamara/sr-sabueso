@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17.2     # Versión de PostgreSQL actualizada
+    container_name: postgres_sr_sabueso
+    environment:
+      POSTGRES_USER: admin           # Usuario de la base de datos
+      POSTGRES_PASSWORD: admin123    # Contraseña de la base de datos
+      POSTGRES_DB: sr_sabueso_db     # Nombre de la base de datos
+    ports:
+      - "5432:5432"       # Exponer el puerto 5432 para conectar desde tu máquina local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Almacenar los datos en un volumen para persistencia
+
+volumes:
+  postgres_data:          # Volumen para persistir datos
