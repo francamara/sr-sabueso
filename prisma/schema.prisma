@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,60 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Products {
-  id             Int      @id @default(autoincrement())
-  name           String
-  description    String?
-  weight         Float
-  listPrice      Float
-  retailPrice    Float
-  stock          Int
-  barcode        String?  @unique
-  age            String?
-  size           String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relations
-  animalId       Int
-  lineId         Int
-  brandId        Int
-  distributorId  Int
-  factoryId      Int
-
-  animal         Animal       @relation(fields: [animalId], references: [id])
-  line           Line         @relation(fields: [lineId], references: [id])
-  brand          Brand        @relation(fields: [brandId], references: [id])
-  distributor    Distributor  @relation(fields: [distributorId], references: [id])
-  factory        Factory      @relation(fields: [factoryId], references: [id])
+model Product {
+  id           Int                  @id @default(autoincrement())
+  name         String
+  description  String?
+  weight       Float
+  listPrice    Float
+  retailPrice  Float
+  stock        Int
+  barcode      String?
+  age          String?
+  size         String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  animalId     Int
+  lineId       Int
+  brandId      Int
+  factoryId    Int
+  animal       Animal               @relation(fields: [animalId], references: [id])
+  brand        Brand                @relation(fields: [brandId], references: [id])
+  factory      Factory              @relation(fields: [factoryId], references: [id])
+  line         Line                 @relation(fields: [lineId], references: [id])
+  distributors ProductDistributor[]
 }
 
 model Animal {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Products[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 }
 
 model Line {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Products[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 }
 
 model Brand {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Products[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 }
 
 model Distributor {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Products[]
+  id       Int                  @id @default(autoincrement())
+  name     String               @unique
+  products ProductDistributor[]
 }
 
 model Factory {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Products[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model ProductDistributor {
+  id            Int         @id @default(autoincrement())
+  productId     Int
+  distributorId Int
+  stock         Int
+  price         Float
+  distributor   Distributor @relation(fields: [distributorId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id])
 }
