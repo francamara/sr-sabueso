@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Product } from "../models";
+import { Product } from "../../models";
 
 const tableHeaders = [
-  { key: "id", label: "#" },
+  // { key: "id", label: "#" },
   { key: "name", label: "Name" },
   { key: "description", label: "Description" },
   { key: "weight", label: "Weight" },
@@ -17,15 +17,15 @@ const tableHeaders = [
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [formData, setFormData] = useState<Partial<Product>>({
-    name: "",
-    description: "",
-    weight: 0,
-    listPrice: 0,
-    retailPrice: 0,
-    stock: 0,
-    barcode: "",
-  });
+  // const [formData, setFormData] = useState<Partial<Product>>({
+  //   name: "",
+  //   description: "",
+  //   weight: 0,
+  //   listPrice: 0,
+  //   retailPrice: 0,
+  //   stock: 0,
+  //   barcode: "",
+  // });
 
   useEffect(() => {
     fetchProducts();
@@ -65,7 +65,7 @@ export default function Products() {
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-[90%]">
         <h1 className="text-dark_moss_green-500 text-2xl font-bold">STOCK</h1>
 
         {/* Product Form
@@ -86,8 +86,8 @@ export default function Products() {
         </form> */}
 
         {/* Product Table */}
-        <div className="overflow-x-auto">
-          <table className="table table-xs">
+        <div className="overflow-x-auto w-full">
+          <table className="table w-full text-black">
             <thead>
               <tr>
                 {tableHeaders.map((header) => (
@@ -96,8 +96,8 @@ export default function Products() {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product.id}>
+              {products.map((product, index) => (
+                <tr key={product.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                   {tableHeaders.map((header) => {
                     const value = product[header.key as keyof Product];
 
@@ -105,6 +105,8 @@ export default function Products() {
                       <td key={header.key}>
                         {Array.isArray(value) 
                           ? value.map((item) => item.distributorId).join(", ") // Mostrar IDs de distribuidores
+                          : header.key === "weight"
+                          ? `${value} kg` // Agregar "kg" si es weight
                           : value?.toString() ?? ""} {/* Convertir cualquier otro valor en string */}
                       </td>
                     );

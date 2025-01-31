@@ -1,7 +1,7 @@
 "use client";
 
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,16 +49,16 @@ export default function RootLayout({
           <nav>
             <ul className="space-y-4">
               <li>
-                <Link href="/" className="hover:text-old_lace-500">Home</Link>
+                <Link href="/dashboard" className="hover:text-old_lace-500">Home</Link>
               </li>
               <li>
-                <Link href="/stock" className="hover:text-old_lace-500">Control de stock</Link>
+                <Link href="/dashboard/products" className="hover:text-old_lace-500">Productos</Link>
               </li>
               <li>
-                <Link href="/qr-generator" className="hover:text-old_lace-500">Generador de QR</Link>
+                <Link href="/dashboard/qr-generator" className="hover:text-old_lace-500">Generador de QR</Link>
               </li>
               <li>
-                <Link href="/pedidos" className="hover:text-old_lace-500">Pedidos</Link>
+                <Link href="/dashboard/pedidos" className="hover:text-old_lace-500">Pedidos</Link>
               </li>
             </ul>
           </nav>
@@ -70,7 +70,7 @@ export default function RootLayout({
           <header className="bg-office_green-500 text-white p-4 flex items-center justify-between shadow-md">
             <h1 className="text-xl font-semibold text-dark_moss_green-500">{pageName}</h1>
             <nav>
-              <Link href="/perfil" className="hover:underline text-soft_brown-500">Mi Perfil</Link>
+              <Link href="/dashboard" className="hover:underline text-soft_brown-500">Mi Perfil</Link>
             </nav>
           </header>
 

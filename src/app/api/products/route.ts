@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 // ✅ Exporta GET para obtener productos
 // eslint-ignore-next-line 
 export async function GET(req: NextRequest) {
+  const request = req
+  console.log(request)
   try {
     const products = await prisma.product.findMany();
     return NextResponse.json(products, { status: 200 });
