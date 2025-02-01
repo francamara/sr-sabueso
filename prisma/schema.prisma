@@ -24,6 +24,7 @@ model Product {
   lineId       Int
   brandId      Int
   factoryId    Int
+  uniqueCode   String @unique // Nuevo campo con código de 8 dígitos
   animal       Animal               @relation(fields: [animalId], references: [id])
   brand        Brand                @relation(fields: [brandId], references: [id])
   factory      Factory              @relation(fields: [factoryId], references: [id])

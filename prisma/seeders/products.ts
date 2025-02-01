@@ -1,3 +1,4 @@
+import { generateProductCode } from "@/app/utils/utils";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -36,6 +37,7 @@ export async function productsSeeder() {
       barcode: "1234567890",
       age: "Adult",
       size: "Large",
+      uniqueCode: generateProductCode(),
       animalId: dog.id,
       lineId: premium.id,
       brandId: brand1.id,
@@ -54,6 +56,7 @@ export async function productsSeeder() {
       barcode: "0987654321",
       age: "Puppy",
       size: "Small",
+      uniqueCode: generateProductCode(),
       animalId: cat.id,
       lineId: economy.id,
       brandId: brand2.id,

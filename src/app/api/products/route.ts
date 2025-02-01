@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { generateProductCode } from "../../utils/utils";
 
 const prisma = new PrismaClient();
+
+// Función para generar un código único de 8 dígitos
+async function generateUniqueProductCode() {
+  let uniqueCode;
+  let exists = true;
+
+  while (exists) {
+    uniqueCode = generateProductCode();
+    const existingProduct = await prisma.product.findUnique({
+      where: { uniqueCode },
+    });
+    exists = !!existingProduct;
+  }
+
+  return uniqueCode;
+}
+
+console.log(generateUniqueProductCode())
 
 // ✅ Exporta GET para obtener productos
 // eslint-ignore-next-line 
@@ -20,7 +39,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, description, weight, listPrice, retailPrice, stock, barcode, animalId, lineId, brandId, factoryId } = body;
+    const { name, description, weight, listPrice, retailPrice, stock, barcode, animalId, uniqueCode, lineId, brandId, factoryId } = body;
 
     const newProduct = await prisma.product.create({
       data: {
@@ -31,6 +50,7 @@ export async function POST(req: NextRequest) {
         retailPrice,
         stock,
         barcode,
+        uniqueCode,
         animal: { connect: { id: animalId } },
         line: { connect: { id: lineId } },
         brand: { connect: { id: brandId } },
