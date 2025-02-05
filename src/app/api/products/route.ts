@@ -25,8 +25,7 @@ console.log(generateUniqueProductCode())
 // ✅ Exporta GET para obtener productos
 // eslint-ignore-next-line 
 export async function GET(req: NextRequest) {
-  const request = req
-  console.log(request)
+  console.log(req)
   try {
     const products = await prisma.product.findMany();
     return NextResponse.json(products, { status: 200 });

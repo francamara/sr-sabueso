@@ -1,19 +1,24 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bungee, Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
+
+const bungee = Bungee({
   subsets: ["latin"],
+  weight: "400", // Regular weight
 });
 
 // Función para convertir rutas a nombres más amigables
@@ -40,12 +45,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex h-screen bg-soft_brown`}
+        className={`${bungee.className} antialiased flex h-screen bg-soft_brown`}
       >
         {/* Sidebar */}
-        <aside className="w-64 bg-rich_black-500 text-white flex flex-col p-4 shadow-lg">
-          <Image src="/Isotipo.png" alt="Señor Sabueso" width={180} height={38} priority />
-          <h2 className="text-lg font-bold mb-6 text-dark_moss_green-500">Señor Sabueso</h2>
+        <aside className="w-64 bg-soft_brown-400 text-white flex flex-col p-4 shadow-lg">
+          <Image src="/Isotipo.png" alt="Señor Sabueso" width={180} height={38} priority className="mx-auto"/>
+          <h2 className="font-bold mb-6 text-dark_moss_green-400 text-center text-4xl">Señor Sabueso</h2>
           <nav>
             <ul className="space-y-4">
               <li>

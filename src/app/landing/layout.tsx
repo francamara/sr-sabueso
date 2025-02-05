@@ -8,7 +8,7 @@ export default function LandingLayout({
   return (
     <html lang="es" className="w-full h-full">
       <body className="bg-white text-black w-full h-full">
-        {children} {/* Solo renderiza el contenido sin sidebar ni header */}
+        {children}
       </body>
     </html>
   );
