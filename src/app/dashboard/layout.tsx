@@ -1,20 +1,11 @@
 "use client";
 
-import { Bungee, Geist, Geist_Mono } from "next/font/google";
+import { Bungee } from "next/font/google";
 import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 const bungee = Bungee({
   subsets: ["latin"],
