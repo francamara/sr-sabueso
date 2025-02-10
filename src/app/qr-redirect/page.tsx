@@ -21,7 +21,7 @@ function generateWhatsAppLink(productName?: string) {
   return `${baseUrl}&text=${encodeURIComponent(productMessage)}`;
 }
 
-export default function LandingMobile() {
+export default function QrRedirect() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId"); // Obtener el parámetro de la URL
   console.log(productId)

@@ -1,6 +1,6 @@
 import "../globals.css";
 
-export default function LandingLayout({
+export default function QrRedirectLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Product } from "../../models";
+import { Product } from "../../../models";
 
 const tableHeaders = [
   // { key: "id", label: "#" },
