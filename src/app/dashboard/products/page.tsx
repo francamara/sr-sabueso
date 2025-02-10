@@ -9,7 +9,7 @@ const tableHeaders = [
   { key: "name", label: "Name" },
   { key: "description", label: "Description" },
   { key: "weight", label: "Weight" },
-  { key: "listPrice", label: "List Price" },
+  // { key: "listPrice", label: "List Price" },
   { key: "retailPrice", label: "Retail Price" },
   { key: "stock", label: "Stock" },
   { key: "barcode", label: "Barcode" }

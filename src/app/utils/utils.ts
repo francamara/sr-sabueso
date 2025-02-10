@@ -1,4 +1,4 @@
-export function generateProductCode(): string {
-    return Math.floor(10000000 + Math.random() * 90000000).toString();
+export function generateProductCode(): number {
+    return Math.floor(10000000 + Math.random() * 90000000);
 }
   

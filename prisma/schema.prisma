@@ -8,66 +8,55 @@ datasource db {
 }
 
 model Product {
-  id           Int                  @id @default(autoincrement())
-  name         String
-  description  String?
-  weight       Float
-  listPrice    Float
-  retailPrice  Float
-  stock        Int
-  barcode      String?
-  age          String?
-  size         String?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  animalId     Int
-  lineId       Int
-  brandId      Int
-  factoryId    Int
-  uniqueCode   String @unique // Nuevo campo con código de 8 dígitos
-  animal       Animal               @relation(fields: [animalId], references: [id])
-  brand        Brand                @relation(fields: [brandId], references: [id])
-  factory      Factory              @relation(fields: [factoryId], references: [id])
-  line         Line                 @relation(fields: [lineId], references: [id])
-  distributors ProductDistributor[]
-}
+  id             Int      @id @default(autoincrement())
+  name           String   // Product name
+  description    String
+  weight         Float    // Weight in kilos
+  extraWeight    Float?   // Extra kilos if applicable
+  stock          Int      // Available stock
+  sold           Int      // Units sold
+  retailPrice    Float    // Retail price
+  barcodeNumber  Int
+  uniqueCode     Int
 
-model Animal {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
-}
+  // Relationships
+  brandId        Int
+  animalId       Int
 
-model Line {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
+  brand          Brand    @relation(fields: [brandId], references: [id])
+  animal         Animal   @relation(fields: [animalId], references: [id])
+  distributors   ProductDistributor[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Brand {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  products  Product[]
+}
+
+model Animal {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  products  Product[]
 }
 
 model Distributor {
-  id       Int                  @id @default(autoincrement())
-  name     String               @unique
-  products ProductDistributor[]
-}
-
-model Factory {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
+  id        Int                  @id @default(autoincrement())
+  name      String               @unique
+  products  ProductDistributor[]
 }
 
 model ProductDistributor {
-  id            Int         @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   productId     Int
   distributorId Int
-  stock         Int
-  price         Float
+
+  stock         Int          // Stock available from this distributor
+  price         Float        // Distributor's selling price
+
   distributor   Distributor @relation(fields: [distributorId], references: [id])
-  product       Product     @relation(fields: [productId], references: [id])
+  product       Product      @relation(fields: [productId], references: [id])
 }
