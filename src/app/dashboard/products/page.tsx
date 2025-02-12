@@ -20,7 +20,7 @@ export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [phoneNumber, setPhoneNumber] = useState<number>(1);
+  const [phoneNumber, setPhoneNumber] = useState<number>(0);
   const [streetAddress, setStreetAddress] = useState<string>("");
 
   useEffect(() => {
@@ -44,6 +44,8 @@ export default function Products() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProduct(null);
+    setPhoneNumber(0);
+    setStreetAddress("")
     setQuantity(1);
   };
 
@@ -110,20 +112,12 @@ export default function Products() {
               min={1}
               onChange={(e) => {
                 const val = Number(e.target.value);
-                if (val < 1) return; // Prevents negative values
+                if (val < 1) return;
                 setQuantity(val);
               }}
             />
-            <label className="block text-gray-600 mt-4">Numero de telefono:</label>
-            <input
-              title="streetAddress"
-              type="text"
-              className="w-full p-2 border rounded-md"
-              value={streetAddress}
-              onChange={(e) => setStreetAddress(e.target.value)}
-            />
 
-            <label className="block text-gray-600 mt-4">Direccion:</label>
+            <label className="block text-gray-600 mt-4">Numero de telefono:</label>
               <input
                 title="phoneNumber"
                 type="k"
@@ -131,6 +125,16 @@ export default function Products() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(Number(e.target.value))}
               />
+              
+            <label className="block text-gray-600 mt-4">Direccion:</label>
+              <input
+                title="streetAddress"
+                type="string"
+                className="w-full p-2 border rounded-md"
+                value={streetAddress}
+                onChange={(e) => setStreetAddress(e.target.value)}
+              />
+
 
             <div className="flex justify-end mt-6">
               <button className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2" onClick={handleCloseModal}>
