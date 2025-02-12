@@ -3,6 +3,7 @@ export interface Product {
     name: string;
     description?: string;
     weight: number;
+    extraWeight: number;
     retailPrice: number;
     stock: number;
     barcode?: string;
