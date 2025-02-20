@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 const bungee = Bungee({
   subsets: ["latin"],
   weight: "400", // Regular weight
+  variable: "--font-bungee",
 });
 
 // Función para convertir rutas a nombres más amigables

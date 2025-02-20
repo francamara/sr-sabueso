@@ -5,27 +5,37 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Record<string, string> } // ✅ Corrección aquí
+  context: { params: { productId: string } } // Fix the params type
 ) {
   try {
-    const productId = params.productId;
+    const productId = parseInt(context.params.productId, 10);
+    console.log("Product ID:", productId);
 
     if (!productId) {
-      return NextResponse.json({ message: "Falta el productId en la URL" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Missing productId in URL" },
+        { status: 400 }
+      );
     }
 
-    // Buscar en la base de datos
-    const product = await prisma.product.findUnique({
-      where: { uniqueCode: productId },
+    const product = await prisma.product.findFirst({
+      where: { uniqueCode: { equals: productId } },
     });
+    
 
     if (!product) {
-      return NextResponse.json({ message: "Producto no encontrado" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Producto no encontrado" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.error("Error en la API de productos:", error);
-    return NextResponse.json({ message: "Error al obtener el producto", error }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error al obtener el producto", error },
+      { status: 500 }
+    );
   }
 }

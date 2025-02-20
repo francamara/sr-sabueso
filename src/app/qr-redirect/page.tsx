@@ -23,37 +23,35 @@ function generateWhatsAppLink(productName?: string) {
 
 export default function QrRedirect() {
   const searchParams = useSearchParams();
-  const productId = searchParams.get("productId"); // Obtener el parámetro de la URL
-  console.log(productId)
+  const productId = searchParams.get("productId"); // Get productId from URL params
 
-  const [product, setProduct] = useState<Product>();
+  const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchProduct() {
       try {
         const response = await axios.get<Product>(`/api/products/${productId}`);
         setProduct(response.data);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching product:", error);
       }
-    };
-    if(productId) {
-      fetchProducts();
+    }
+
+    if (productId) {
+      fetchProduct();
     }
   }, [productId]);
 
-
-  console.log(product)
-
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const whatsappUrl = generateWhatsAppLink(product?.name);
-      window.location.href = whatsappUrl;
-    }, 40000);
+    if (product) { // Wait until product is fetched
+      const timer = setTimeout(() => {
+        const whatsappUrl = generateWhatsAppLink(product.description);
+        window.location.href = whatsappUrl;
+      }, 4000);
   
-    return () => clearTimeout(timer);
-  }, [product]); // ⚡ Dependencia actualizada para usar `product`
-  
+      return () => clearTimeout(timer);
+    }
+  }, [product]); // This will now run only when product is updated
 
   return (
     <div className={`${bungee.className} w-full h-screen bg-soft_brown-300 flex align-middle justify-center flex-col select-none`}>

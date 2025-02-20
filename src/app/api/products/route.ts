@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    console.log("HOLAAA A A A ")
     const products = await prisma.product.findMany();
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
