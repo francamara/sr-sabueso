@@ -16,11 +16,11 @@ const bungee = Bungee({
 // Función para convertir rutas a nombres más amigables
 function getPageName(pathname: string): string {
   const paths: { [key: string]: string } = {
-    "/": "Inicio",
-    "/stock": "Control de stock",
-    "/qr-generator": "Generador de QR",
-    "/pedidos": "Pedidos",
-    "/products": "Productos",
+    "/dashboard": "Inicio",
+    "/dashboard/stock": "Control de stock",
+    "/dashboard/qr-generator": "Generador de QR",
+    "/dashboard/pedidos": "Pedidos",
+    "/dashboard/products": "Productos",
   };
 
   return paths[pathname] || "Página desconocida";

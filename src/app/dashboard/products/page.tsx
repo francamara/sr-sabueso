@@ -12,7 +12,7 @@ const tableHeaders = [
   { key: "retailPrice", label: "Precio Publico" },
   { key: "stock", label: "Stock" },
   { key: "uniqueCode", label: "Codigo Interno" },
-  { key: "button", label: "Agregar Pedido" }
+  { key: "button", label: "Agregar Pedido" },
 ];
 
 export default function Products() {
@@ -22,6 +22,7 @@ export default function Products() {
   const [quantity, setQuantity] = useState<number>(1);
   const [phoneNumber, setPhoneNumber] = useState<number>(0);
   const [streetAddress, setStreetAddress] = useState<string>("");
+  const [barcode, setBarcode] = useState<string>("");
 
   useEffect(() => {
     fetchProducts();
@@ -45,7 +46,7 @@ export default function Products() {
     setIsModalOpen(false);
     setSelectedProduct(null);
     setPhoneNumber(0);
-    setStreetAddress("")
+    setStreetAddress("");
     setQuantity(1);
   };
 
@@ -54,45 +55,61 @@ export default function Products() {
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-[90%]">
-        <h1 className="text-dark_moss_green-500 text-2xl font-bold">STOCK</h1>
+    <div className="flex flex-col min-h-screen pb-20 font-[family-name:var(--font-geist-sans)] px-6">
+      {/* Barcode Input Section */}
+      <div className="flex flex-wrap items-center gap-4 w-full bg-gray-100 p-4 rounded-md shadow-sm">
+        <label className="text-gray-700 text-lg font-semibold whitespace-nowrap">Código de Barras:</label>
+        
+        <input
+          tabIndex={0}
+          title="barcode"
+          type="number"
+          className="p-2 border rounded-md flex-grow min-w-0"
+          value={barcode}
+          onChange={(e) => setBarcode(e.target.value)}
+        />
+        
+        <button
+          className="px-4 py-2 bg-moss_green-400 hover:bg-moss_green-500 text-white font-bold rounded whitespace-nowrap"
+        >
+          Buscar
+        </button>
+      </div>
 
-        {/* Product Table */}
-        <div className="overflow-x-auto w-full">
-          <table className="table w-full text-black">
-            <thead>
-              <tr>
+      {/* Product Table */}
+      <div className="overflow-x-auto w-full mt-6">
+        <table className="table-auto w-full text-black border-collapse">
+          <thead className="bg-dark_moss_green-500 text-white">
+            <tr>
+              {tableHeaders.map((header) => (
+                <th key={header.key} className="p-3 text-left">{header.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product, index) => (
+              <tr key={product.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
                 {tableHeaders.map((header) => (
-                  <th key={header.key}>{header.label}</th>
+                  <td key={header.key} className="p-3 border-t">
+                    {header.key === "button" ? (
+                      <button
+                        onClick={() => handleOpenModal(product)}
+                        className="px-4 py-2 bg-moss_green-400 hover:bg-moss_green-500 text-white font-bold rounded"
+                      >
+                        Agregar
+                      </button>
+                    ) : header.key === "weight" ? (
+                      `${product[header.key as keyof Product]} kg`
+                    ) : (
+                      product[header.key as keyof Product]?.toString() ?? ""
+                    )}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {products.map((product, index) => (
-                <tr key={product.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                  {tableHeaders.map((header) => (
-                    <td key={header.key}>
-                      {header.key === "button" ? (
-                        <button
-                          onClick={() => handleOpenModal(product)}
-                          className="px-4 py-2 bg-moss_green-400 hover:bg-moss_green-500 text-white font-bold rounded"
-                        >
-                          Agregar
-                        </button>
-                      ) : header.key === "weight" ? (
-                        `${product[header.key as keyof Product]} kg`
-                      ) : (
-                        product[header.key as keyof Product]?.toString() ?? ""
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Modal Component */}
       {isModalOpen && selectedProduct && (
@@ -103,39 +120,42 @@ export default function Products() {
             <p>Kilos: {selectedProduct.weight}kg</p>
             <p>Kilos gratis: {selectedProduct.extraWeight}kg</p>
 
-            <label className="block text-gray-600 mt-4">Cantidad:</label>
-            <input
-              title="quantity"
-              type="number"
-              className="w-full p-2 border rounded-md"
-              value={quantity}
-              min={1}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val < 1) return;
-                setQuantity(val);
-              }}
-            />
+            {/* Inputs Section */}
+            <div className="flex flex-col gap-3 mt-4">
+              <label className="text-gray-600">Cantidad:</label>
+              <input
+                title="quantity"
+                type="number"
+                className="w-full p-2 border rounded-md"
+                value={quantity}
+                min={1}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val < 1) return;
+                  setQuantity(val);
+                }}
+              />
 
-            <label className="block text-gray-600 mt-4">Numero de telefono:</label>
+              <label className="text-gray-600">Número de Teléfono:</label>
               <input
                 title="phoneNumber"
-                type="k"
+                type="number"
                 className="w-full p-2 border rounded-md"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(Number(e.target.value))}
               />
-              
-            <label className="block text-gray-600 mt-4">Direccion:</label>
+
+              <label className="text-gray-600">Dirección:</label>
               <input
                 title="streetAddress"
-                type="string"
+                type="text"
                 className="w-full p-2 border rounded-md"
                 value={streetAddress}
                 onChange={(e) => setStreetAddress(e.target.value)}
               />
+            </div>
 
-
+            {/* Buttons */}
             <div className="flex justify-end mt-6">
               <button className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2" onClick={handleCloseModal}>
                 Cancelar
