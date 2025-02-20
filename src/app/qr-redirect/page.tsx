@@ -47,7 +47,7 @@ export default function QrRedirect() {
       const timer = setTimeout(() => {
         const whatsappUrl = generateWhatsAppLink(product.description);
         window.location.href = whatsappUrl;
-      }, 4000);
+      }, 3500);
   
       return () => clearTimeout(timer);
     }
