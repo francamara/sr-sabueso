@@ -7,56 +7,157 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Product {
-  id             Int      @id @default(autoincrement())
-  name           String   // Product name
-  description    String
-  weight         Float    // Weight in kilos
-  extraWeight    Float?   // Extra kilos if applicable
-  stock          Int      // Available stock
-  sold           Int      // Units sold
-  retailPrice    Float    // Retail price
-  barcodeNumber  Int
-  uniqueCode     Int
-
-  // Relationships
-  brandId        Int
-  animalId       Int
-
-  brand          Brand    @relation(fields: [brandId], references: [id])
-  animal         Animal   @relation(fields: [animalId], references: [id])
-  distributors   ProductDistributor[]
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+model Role {
+  id     Int     @id @default(autoincrement())
+  name   String
+  users  User[]
 }
 
-model Brand {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Product[]
+model User {
+  id           Int             @id @default(autoincrement())
+  username     String
+  phone_number Int             @unique
+  role_id      Int
+  role         Role            @relation(fields: [role_id], references: [id])
+  addresses    UserAddress[]
+  orders       Order[]
+  stockMovements StockMovement[]
+  created_at   DateTime        @default(now())
+}
+
+model UserAddress {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  address    String
+  created_at DateTime @default(now())
+  orders     Order[]
 }
 
 model Animal {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Product[]
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Brand {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Product {
+  id               Int             @id @default(autoincrement())
+  name             String
+  brand_id         Int
+  brand            Brand           @relation(fields: [brand_id], references: [id])
+  description      String
+  sku              String
+  barcode          String          @unique
+  stock            Int
+  retail_price     Float
+  wholesale_price  Float
+  weight           Float
+  extra_weight     Float
+  animal_id        Int
+  animal           Animal          @relation(fields: [animal_id], references: [id])
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  is_deleted       Boolean         @default(false)
+  orderItems       OrderItem[]
+  productImages    ProductImage[]
+  priceHistory     PriceHistory[]
+  stockMovements   StockMovement[]
 }
 
 model Distributor {
-  id        Int                  @id @default(autoincrement())
-  name      String               @unique
-  products  ProductDistributor[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  priceHistory  PriceHistory[]
 }
 
-model ProductDistributor {
-  id            Int          @id @default(autoincrement())
-  productId     Int
-  distributorId Int
+model PriceType {
+  id            Int            @id @default(autoincrement())
+  name          String
+  priceHistory  PriceHistory[]
+}
 
-  stock         Int          // Stock available from this distributor
-  price         Float        // Distributor's selling price
+model PriceHistory {
+  id              Int         @id @default(autoincrement())
+  product_id      Int
+  distributor_id  Int
+  price_type_id   Int
+  product         Product     @relation(fields: [product_id], references: [id])
+  distributor     Distributor @relation(fields: [distributor_id], references: [id])
+  priceType       PriceType   @relation(fields: [price_type_id], references: [id])
+  price           Float
+  changed_at      DateTime    @default(now())
+  is_deleted      Boolean     @default(false)
+}
 
-  distributor   Distributor @relation(fields: [distributorId], references: [id])
-  product       Product      @relation(fields: [productId], references: [id])
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  product    Product  @relation(fields: [product_id], references: [id])
+  url        String
+  alt_text   String
+  created_at DateTime @default(now())
+}
+
+model OrderStatus {
+  id     Int     @id @default(autoincrement())
+  name   String
+  orders Order[]
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  user_id         Int
+  address_id      Int
+  order_status_id Int
+  user            User          @relation(fields: [user_id], references: [id])
+  address         UserAddress   @relation(fields: [address_id], references: [id])
+  status          OrderStatus   @relation(fields: [order_status_id], references: [id])
+  items           OrderItem[]
+  delivery        Delivery?
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  order_id   Int
+  product_id Int
+  quantity   Int
+  price      Float
+  order      Order   @relation(fields: [order_id], references: [id])
+  product    Product @relation(fields: [product_id], references: [id])
+}
+
+model Delivery {
+  id           Int     @id @default(autoincrement())
+  order_id     Int     @unique
+  order        Order   @relation(fields: [order_id], references: [id])
+  delivered_at DateTime
+  status       String
+  notes        String
+}
+
+model MovementType {
+  id               Int              @id @default(autoincrement())
+  name             String
+  stockMovements   StockMovement[]
+}
+
+model StockMovement {
+  id               Int          @id @default(autoincrement())
+  product_id       Int
+  user_id          Int
+  movement_type_id Int
+  change           Int
+  reference_id     Int
+  created_at       DateTime     @default(now())
+  product          Product      @relation(fields: [product_id], references: [id])
+  user             User         @relation(fields: [user_id], references: [id])
+  movementType     MovementType @relation(fields: [movement_type_id], references: [id])
 }

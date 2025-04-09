@@ -1,0 +1,139 @@
+// OPEN WITH dbdiagram.io OR THE FOLLOWING EXTENSION
+// https://marketplace.visualstudio.com/items?itemName=nicolas-liger.dbml-viewer
+
+// Tabla de roles
+Table roles {
+    id integer [primary key]
+    name varchar // Ej: 'admin', 'customer'
+  }
+  
+  // Tabla de usuarios
+  Table users {
+    id integer [primary key]
+    username varchar
+    phone_number integer [unique]
+    role_id integer [ref: > roles.id] // Ej: 1 (admin)
+    created_at timestamp
+  }
+  
+  // Direcciones del usuario
+  Table user_addresses {
+    id integer [primary key]
+    user_id integer [ref: > users.id] // Ej: 3 (usuario Juan)
+    address text
+    created_at timestamp
+  }
+  
+  // Tabla de animales
+  Table animals {
+    id integer [primary key]
+    name varchar // Ej: 'perro', 'gato'
+  }
+  
+  // Tabla de marcas
+  Table brands {
+    id integer [primary key]
+    name varchar // Ej: 'Royal Canin', 'Pedigree'
+  }
+  
+  // Tabla de productos
+  Table products {
+    id integer [primary key]
+    name varchar
+    brand_id integer [ref: > brands.id] // Ej: 2 (Pedigree)
+    description text
+    sku varchar
+    barcode varchar [unique]
+    stock integer
+    retail_price decimal
+    wholesale_price decimal
+    weight decimal
+    extra_weight decimal
+    animal_id integer [ref: > animals.id] // Ej: 1 (perro)
+    created_at timestamp
+    updated_at timestamp
+    is_deleted boolean
+  }
+  
+  // Tabla de distribuidores
+  Table distributors {
+    id integer [primary key]
+    name varchar // Ej: 'Distribuidora Norte'
+  }
+  
+  // Tipos de precio
+  Table price_types {
+    id integer [primary key]
+    name varchar // Ej: 'retail', 'wholesale'
+  }
+  
+  // Historial de precios
+  Table price_history {
+    id integer [primary key]
+    product_id integer [ref: > products.id] // Ej: 10
+    distributor_id integer [ref: > distributors.id] // Ej: 3
+    price_type_id integer [ref: > price_types.id] // Ej: 1 (retail)
+    price float
+    changed_at timestamp
+    is_deleted boolean
+  }
+  
+  // Imágenes del producto
+  Table product_images {
+    id integer [primary key]
+    product_id integer [ref: > products.id] // Ej: 12
+    url text
+    alt_text varchar
+    created_at timestamp
+  }
+  
+  // Estados de orden
+  Table order_statuses {
+    id integer [primary key]
+    name varchar // Ej: 'pendiente', 'en camino', 'entregado', 'cancelado'
+  }
+  
+  // Órdenes
+  Table orders {
+    id integer [primary key]
+    user_id integer [ref: > users.id] // Ej: 5
+    address_id integer [ref: > user_addresses.id] // Ej: 2
+    order_status_id integer [ref: > order_statuses.id] // Ej: 1 (pendiente)
+    created_at timestamp
+    updated_at timestamp
+  }
+  
+  // Ítems de la orden
+  Table order_items {
+    id integer [primary key]
+    order_id integer [ref: > orders.id] // Ej: 4
+    product_id integer [ref: > products.id] // Ej: 8
+    quantity integer
+    price decimal
+  }
+  
+  // Entregas
+  Table deliveries {
+    id integer [primary key]
+    order_id integer [ref: > orders.id] // Ej: 4
+    delivered_at timestamp
+    status varchar // Ej: 'completado', 'fallido'
+    notes text
+  }
+  
+  // Tipos de movimiento de stock
+  Table movement_types {
+    id integer [primary key]
+    name varchar // Ej: 'order', 'manual_adjustment', 'return'
+  }
+  
+  // Registro de movimientos de stock
+  Table stock_movements {
+    id integer [primary key]
+    product_id integer [ref: > products.id] // Ej: 8
+    user_id integer [ref: > users.id] // Ej: 5 (admin que modificó)
+    movement_type_id integer [ref: > movement_types.id] // Ej: 1 (order)
+    change integer // positivo (entrada) o negativo (salida)
+    reference_id integer // Ej: id de la orden (order_id = 4)
+    created_at timestamp
+  }
