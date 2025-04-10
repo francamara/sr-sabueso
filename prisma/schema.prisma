@@ -57,6 +57,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
 }
+
 model VerificationToken {
   identifier String
   token      String   @unique
