@@ -1,45 +1,44 @@
-import { getServerSession, NextAuthOptions } from "next-auth";
+// lib/auth.ts
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
 
-// Configuración de NextAuth
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        username: { label: "Usuario", type: "text" },
+        password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials.password) return null;
-      
+
         const user = await prisma.user.findUnique({
           where: { username: credentials.username },
           include: { role: true },
         });
-      
+
         if (!user || !user.password) return null;
-      
+
         const isValid = await bcrypt.compare(credentials.password, user.password);
-      
         if (!isValid) return null;
-      
+
         return {
           id: user.id.toString(),
           email: user.email,
-          username: user.username,
-          role: user.role?.name || 'client',
+          name: user.username,
+          role: user.role?.name ?? "client",
         };
-      }
+      },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -57,11 +56,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/login", // Página personalizada de login
+    signIn: "/login", // Redirección personalizada si el login falla
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
-
-export async function auth() {
-  return await getServerSession(authOptions);
-}

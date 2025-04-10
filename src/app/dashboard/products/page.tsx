@@ -118,7 +118,7 @@ export default function Products() {
             <h2 className="text-xl font-bold mb-4">Nuevo Pedido</h2>
             <p className="text-gray-700">{selectedProduct.name}</p>
             <p>Kilos: {selectedProduct.weight}kg</p>
-            <p>Kilos gratis: {selectedProduct.extraWeight}kg</p>
+            <p>Kilos gratis: {selectedProduct.extra_weight}kg</p>
 
             {/* Inputs Section */}
             <div className="flex flex-col gap-3 mt-4">

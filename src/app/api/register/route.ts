@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+import  { randomBytes } from "crypto";
+import { addMinutes } from "date-fns";
+import { sendVerificationEmail } from "@/lib/mail"; // tenés que tener esta función creada
+
 
 const prisma = new PrismaClient();
 
@@ -43,9 +47,24 @@ export async function POST(req: Request) {
       });
       
       console.log("🆕 New user created:", newUser);
+
+
+      const token = randomBytes(32).toString("hex");
+      const expires = addMinutes(new Date(), 15); // Token válido por 15 minutos
+      
+      await prisma.verificationToken.create({
+        data: {
+          identifier: email,
+          token,
+          expires,
+        },
+      });
+
+      const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
+      await sendVerificationEmail(email, verifyUrl);
       
       return NextResponse.json({ user: newUser }, { status: 201 });
-      
+
   } catch (error: any) {
     console.error("🔥 Unexpected error in /api/register:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
