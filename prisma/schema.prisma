@@ -9,20 +9,60 @@ datasource db {
 
 model Role {
   id     Int     @id @default(autoincrement())
-  name   String
+  name   String  @unique
   users  User[]
+}
+
+model Account {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?   @db.Text
+  session_state     String?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
   id           Int             @id @default(autoincrement())
-  username     String
-  phone_number Int             @unique
+  username     String          @unique
+  phone_number String             @unique
   role_id      Int
   role         Role            @relation(fields: [role_id], references: [id])
   addresses    UserAddress[]
   orders       Order[]
   stockMovements StockMovement[]
+  password     String?
   created_at   DateTime        @default(now())
+  
+  email         String?   @unique
+  emailVerified DateTime?
+
+  accounts      Account[]
+  sessions      Session[]
+}
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model UserAddress {
