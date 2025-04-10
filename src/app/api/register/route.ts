@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       
       return NextResponse.json({ user: newUser }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("🔥 Unexpected error in /api/register:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
