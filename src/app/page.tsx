@@ -13,8 +13,14 @@ const Page = () => {
         <p className="text-2xl max-w-2xl mb-12 text-dark_moss_green-400 font-medium">
           El alimento favorito de tu mascota, en la puerta de tu casa. Fácil y rápido.
         </p>
-        <div className="w-full max-w-4xl h-72 bg-soft_brown-200 rounded-xl border-2 border-dashed border-dark_moss_green-400 flex items-center justify-center text-dark_moss_green-400 text-lg">
-          Imagen destacada o ilustración acá
+        <div className="relative w-full max-w-4xl h-72 bg-soft_brown-200 rounded-xl border-2 border-dashed border-dark_moss_green-400 overflow-hidden">
+          <Image
+            src="/landing-image.png"
+            alt="Señor Sabueso"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
       </section>
 
