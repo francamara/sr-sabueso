@@ -41,7 +41,7 @@ export async function POST(req: Request) {
           email,
           username,
           password: hashedPassword,
-          phone_number: '123456',
+          phone_number: null,
           role: { connect: { id: 1 } },
         },
       });

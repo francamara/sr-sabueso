@@ -42,7 +42,7 @@ model Session {
 model User {
   id           Int             @id @default(autoincrement())
   username     String          @unique
-  phone_number String             @unique
+  phone_number String?             @unique
   role_id      Int
   role         Role            @relation(fields: [role_id], references: [id])
   addresses    UserAddress[]
