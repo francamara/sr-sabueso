@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Bungee } from "next/font/google";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Button from "../components/button";
 
 const bungee = Bungee({
   subsets: ['latin'],
@@ -16,11 +17,13 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     const res = await fetch("/api/register", {
       method: "POST",
@@ -28,8 +31,10 @@ export default function RegisterPage() {
       headers: { "Content-Type": "application/json" },
     });
 
+    setLoading(false);
+
     if (res.ok) {
-      router.push("/login");
+      router.push("/check-email");
     } else {
       const data = await res.json();
       setError(data.error || 'Ocurrió un error al registrarse');
@@ -78,11 +83,14 @@ export default function RegisterPage() {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
+          <Button
             type="submit"
-            className="px-6 py-3 bg-moss_green-500 text-white rounded-md hover:bg-office_green-400 transition-colors shadow-md block mx-auto">
-            Registrarme
-          </button>
+            loading={loading}
+            className="w-full"
+
+          >
+          Registrarse
+        </Button>
         </form>
       </div>
     </div>

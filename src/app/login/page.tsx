@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Button from '../components/button';
 
 const bungee = Bungee({
   subsets: ['latin'],
@@ -16,11 +17,13 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // limpiar error previo
+    setError('');
+    setIsLoading(true);
 
     const res = await signIn('credentials', {
       redirect: false,
@@ -28,13 +31,15 @@ export default function LoginPage() {
       password,
     });
 
+    setIsLoading(false);
+
     if (res?.ok) {
       router.push("/dashboard");
     } else {
       setError(res?.error || "Usuario o contraseña incorrectos");
     }
-    
   };
+
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.has("callbackUrl")) {
@@ -73,11 +78,14 @@ export default function LoginPage() {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
+          <Button
             type="submit"
-            className="px-6 py-3 bg-moss_green-500 text-white rounded-md hover:bg-office_green-400 transition-colors shadow-md block mx-auto">
-            Entrar
-          </button>
+            loading={isLoading}
+            className="w-full"
+
+          >
+          Iniciar Sesión
+        </Button>
         </form>
       </div>
     </div>
