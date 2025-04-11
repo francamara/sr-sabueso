@@ -36,7 +36,7 @@ const Page = () => {
         </div>
         <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
           <h3 className="text-2xl font-bold mb-3 text-dark_moss_green-400">Entrega Eficiente</h3>
-          <p className="text-dark_moss_green-400">Nos avisas cuando te queda cómodo recibir el pedido y te lo entregamos en al puerta de tu casa.</p>
+          <p className="text-dark_moss_green-400">Nos avisas cuando te queda cómodo recibir el pedido y te lo entregamos la puerta de tu casa.</p>
         </div>
       </section>
 
