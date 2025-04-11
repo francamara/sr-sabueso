@@ -1,37 +1,27 @@
+// app/verify-email/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function VerifyEmailPage() {
-  const [message, setMessage] = useState("Verifying your email...");
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const token = searchParams.get("token");
-
-    if (!token) {
-      setMessage("Verification token is missing.");
-      return;
-    }
-
-    fetch(`/api/verify-email?token=${token}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          setMessage(`⚠️ ${data.error}`);
-        } else {
-          setMessage("✅ Email verificado! Ya podés iniciar sesion.");
-        }
-      })
-      .catch(() => {
-        setMessage("Ocurrio un error verificando el email. Por favor, contactate con nosotros para poder ayudarte.");
-      });
-  }, [searchParams]);
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>{message}</h1>
+    <div>
+      <h1>Verificando tu correo electrónico</h1>
+      <p>Token: {token}</p>
+      <p>Email: {email}</p>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

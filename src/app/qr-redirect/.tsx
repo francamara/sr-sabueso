@@ -1,4 +1,5 @@
-"use client";
+// app/qr-redirect/QrRedirectClient.tsx
+'use client'
 
 import Image from "next/image";
 import { Bungee } from "next/font/google";
@@ -9,9 +10,8 @@ import axios from "axios";
 
 const bungee = Bungee({
   subsets: ["latin"],
-  weight: "400", // Regular weight
+  weight: "400",
 });
-
 
 function generateWhatsAppLink(productName?: string) {
   const baseUrl = "https://api.whatsapp.com/send?phone=541138991367";
@@ -21,10 +21,9 @@ function generateWhatsAppLink(productName?: string) {
   return `${baseUrl}&text=${encodeURIComponent(productMessage)}`;
 }
 
-export default function QrRedirect() {
+export default function QrRedirectClient() {
   const searchParams = useSearchParams();
-  const productId = searchParams.get("productId"); // Get productId from URL params
-
+  const productId = searchParams.get("productId");
   const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -43,15 +42,15 @@ export default function QrRedirect() {
   }, [productId]);
 
   useEffect(() => {
-    if (product) { // Wait until product is fetched
+    if (product) {
       const timer = setTimeout(() => {
         const whatsappUrl = generateWhatsAppLink(product.description);
         window.location.href = whatsappUrl;
       }, 3500);
-  
+
       return () => clearTimeout(timer);
     }
-  }, [product]); // This will now run only when product is updated
+  }, [product]);
 
   return (
     <div className={`${bungee.className} w-full h-screen bg-soft_brown-300 flex align-middle justify-center flex-col select-none`}>
@@ -59,21 +58,17 @@ export default function QrRedirect() {
         <div className="text-center text-dark_moss_green-100">
           <Image src="/Isotipo.png" className="m-auto" alt="Señor Sabueso" width={180} height={38} priority />
           <h1 className="text-4xl font-bold mt-4 text-dark_moss_green-600">Señor Sabueso</h1>
-  
-          {/* Mostrar un texto distinto si existe un producto */}
+
           <h2 className="text-dark_moss_green-600 mt-4 text-3xl">
             {product
               ? `Estás consultando por: ${product.description}`
-              : "El alimento favorito de tu mascota, con envío a domicilio."
-            }
+              : "El alimento favorito de tu mascota, con envío a domicilio."}
           </h2>
-  
-          {/* Nuevo Indicador de Carga */}
+
           <div className="mt-6 flex justify-center items-center">
             <div className="w-10 h-10 border-4 border-t-soft_brown-200 rounded-full animate-spin border-dark_moss_green-600"></div>
           </div>
-  
-          {/* Texto de redirección */}
+
           <p className="mt-4 text-2xl animate-pulse text-dark_moss_green-600">
             Redirigiendo a WhatsApp...
           </p>
@@ -81,6 +76,4 @@ export default function QrRedirect() {
       </div>
     </div>
   );
-  
-  
 }

@@ -1,26 +1,22 @@
-import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-type Params = {
-  params: {
-    productId: string;
-  };
-};
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+) {
   try {
-    const productId = parseInt(params.productId, 10);
-    console.log("Product ID:", productId);
+    const { productId } = await params;
 
     if (!productId) {
       return NextResponse.json(
-        { message: "Missing or invalid productId in URL" },
+        { message: "Falta el SKU en la URL" },
         { status: 400 }
       );
     }
 
     const product = await prisma.product.findFirst({
-      where: { sku: productId.toString() },
+      where: { sku: productId },
     });
 
     if (!product) {
@@ -34,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   } catch (error) {
     console.error("Error en la API de productos:", error);
     return NextResponse.json(
-      { message: "Error al obtener el producto" },
+      { message: "Error al obtener el producto", error },
       { status: 500 }
     );
   }
