@@ -3,14 +3,15 @@ import Image from "next/image";
 
 const Page = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-soft_brown-100 text-dark_moss_green-400 select-none"
-    style={{
-      backgroundColor: "#fefaf4", // el equivalente de soft_brown-100
-      backgroundImage: "url('/patterns/bones.png')",
-      backgroundRepeat: "repeat",
-      backgroundSize: "200px", // ajustá según el tamaño del PNG
-      opacity: 1,
-    }}>
+    <div
+      className="min-h-screen flex flex-col bg-soft_brown-100 text-dark_moss_green-400 select-none"
+      style={{
+        backgroundColor: "#fefaf4",
+        backgroundImage: "url('/patterns/bones.png')",
+        backgroundRepeat: "repeat",
+        backgroundSize: "200px",
+      }}
+    >
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center px-6 py-24 bg-soft_brown-300 shadow-inner">
         <Image src="/Isotipo.png" alt="Señor Sabueso" width={180} height={38} priority className="mx-auto" />
@@ -63,8 +64,28 @@ const Page = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-sm text-dark_moss_green-400 bg-soft_brown-200 border-t border-soft_brown-300">
-        © {new Date().getFullYear()} Señor Sabueso. Todos los derechos reservados.
+      <footer className="py-8 text-center text-sm text-dark_moss_green-400 bg-soft_brown-200 border-t border-soft_brown-300">
+      <div className="flex justify-center gap-4 mb-4">
+        <a
+          href="https://www.instagram.com/srsabueso/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+          className="flex items-center gap-2 text-dark_moss_green-400 hover:opacity-75 transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            className="w-6 h-6"
+          >
+            <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5Zm8.25 2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0v-.5a.75.75 0 0 1 .75-.75ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
+          </svg>
+          <span className="text-base font-medium">Instagram</span>
+        </a>
+      </div>
+
+        <p>© {new Date().getFullYear()} Señor Sabueso. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
