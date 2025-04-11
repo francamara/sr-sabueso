@@ -3,7 +3,7 @@ import Image from "next/image";
 
 const Page = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-soft_brown-100 text-dark_moss_green-400"
+    <div className="min-h-screen flex flex-col bg-soft_brown-100 text-dark_moss_green-400 select-none"
     style={{
       backgroundColor: "#fefaf4", // el equivalente de soft_brown-100
       backgroundImage: "url('/patterns/bones.png')",
