@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Bungee } from "next/font/google";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Button from "../components/button";
+import Button from "@/components/button";
 
 const bungee = Bungee({
   subsets: ['latin'],

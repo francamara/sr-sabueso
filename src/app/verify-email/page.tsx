@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import Image from "next/image";
 import { Bungee } from "next/font/google";
-import Button from "../components/button";
+import Button from "@/components/button";
 
 const bungee = Bungee({
   subsets: ['latin'],

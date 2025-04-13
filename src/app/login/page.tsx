@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Button from '../components/button';
+import Button from '@/components/button';
 
 const bungee = Bungee({
   subsets: ['latin'],
