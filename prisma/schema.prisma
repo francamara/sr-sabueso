@@ -42,7 +42,7 @@ model Session {
 model User {
   id           Int             @id @default(autoincrement())
   username     String          @unique
-  phone_number String?             @unique
+  phone_number String?         @unique
   role_id      Int
   role         Role            @relation(fields: [role_id], references: [id])
   addresses    UserAddress[]
@@ -50,7 +50,7 @@ model User {
   stockMovements StockMovement[]
   password     String?
   created_at   DateTime        @default(now())
-  
+
   email         String?   @unique
   emailVerified DateTime?
 
@@ -80,8 +80,28 @@ model Animal {
   name     String
   products Product[]
 }
-
 model Brand {
+  id            Int            @id @default(autoincrement())
+  name          String
+  products      Product[]
+  productLines  ProductLine[]
+}
+
+model ProductLine {
+  id        Int     @id @default(autoincrement())
+  name      String
+  brand_id  Int
+  brand     Brand   @relation(fields: [brand_id], references: [id])
+  products  Product[]
+}
+
+model AnimalAge {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model AnimalSize {
   id       Int       @id @default(autoincrement())
   name     String
   products Product[]
@@ -89,19 +109,24 @@ model Brand {
 
 model Product {
   id               Int             @id @default(autoincrement())
-  name             String
   brand_id         Int
   brand            Brand           @relation(fields: [brand_id], references: [id])
+  product_line_id  Int
+  productLine      ProductLine     @relation(fields: [product_line_id], references: [id]) // ← esto ahora está bien
+  animal_id        Int
+  animal           Animal          @relation(fields: [animal_id], references: [id])
+  animal_age_id    Int
+  animalAge        AnimalAge       @relation(fields: [animal_age_id], references: [id])
+  animal_size_id   Int?
+  animalSize       AnimalSize?     @relation(fields: [animal_size_id], references: [id])
   description      String
-  sku              String
+  sku              String          @unique
   barcode          String          @unique
   stock            Int
   retail_price     Float
   wholesale_price  Float
   weight           Float
   extra_weight     Float
-  animal_id        Int
-  animal           Animal          @relation(fields: [animal_id], references: [id])
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
   is_deleted       Boolean         @default(false)
@@ -110,6 +135,7 @@ model Product {
   priceHistory     PriceHistory[]
   stockMovements   StockMovement[]
 }
+
 
 model Distributor {
   id            Int            @id @default(autoincrement())
