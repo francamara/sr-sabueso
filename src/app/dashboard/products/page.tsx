@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { formatPrice } from "@/app/utils/utils";
 
 type Brand = { id: number; name: string };
 type Animal = { id: number; name: string };
@@ -27,6 +28,20 @@ const tableHeaders = [
   { key: "stock", label: "Stock" },
   { key: "sku", label: "Código Interno" },
 ];
+
+const brandColors: { [key: number]: string } = {
+  1: "bg-red-200 text-red-800",
+  2: "bg-blue-200 text-blue-800",
+  3: "bg-green-200 text-green-800",
+  // default fallback...
+};
+
+const animalColors: { [key: number]: string } = {
+  1: "bg-yellow-100 text-yellow-800",
+  2: "bg-purple-200 text-purple-800",
+  3: "bg-pink-200 text-pink-800",
+  // default fallback...
+};
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -161,19 +176,33 @@ export default function Products() {
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 border-t">
-                      <span className="inline-block px-2 py-1 rounded-full bg-soft_brown-200 text-xs font-semibold">
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                          brandColors[product.brand_id] || "bg-gray-200 text-gray-700"
+                        }`}
+                      >
                         {getBrandName(product.brand_id)}
                       </span>
                     </td>
+
                     <td className="p-4 border-t">
-                      <span className="inline-block px-2 py-1 rounded-full bg-soft_brown-100 text-xs font-semibold">
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                          animalColors[product.animal_id] || "bg-gray-100 text-gray-700"
+                        }`}
+                      >
                         {getAnimalName(product.animal_id)}
                       </span>
                     </td>
                     {tableHeaders.map((header) => (
-                      <td key={header.key} className="p-4 border-t">
+                      <td
+                        key={header.key}
+                        className={`p-4 border-t ${
+                          header.key === "retail_price" ? "font-bold" : ""
+                        }`}
+                      >
                         {header.key === "retail_price" && typeof product[header.key as keyof Product] === "number"
-                          ? `$${(product[header.key as keyof Product] as number).toFixed(2)}`
+                          ? formatPrice(product[header.key as keyof Product] as number)
                           : product[header.key as keyof Product]?.toString() ?? ""}
                       </td>
                     ))}
