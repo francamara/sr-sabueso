@@ -8,6 +8,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
+        bungee: ['var(--font-bungee)', 'cursive'],
+      },
       colors: {
         rich_black: {
           DEFAULT: '#020C0F',

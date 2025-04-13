@@ -1,6 +1,6 @@
 'use client';
 
-import { Bungee } from "next/font/google";
+import { Bungee, Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
@@ -10,6 +10,12 @@ const bungee = Bungee({
   variable: "--font-bungee",
 });
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter', // variable CSS para usar en Tailwind o CSS
+  display: 'swap',
+})
+
 export default function RootLayout({
     children,
   }: {
@@ -17,7 +23,7 @@ export default function RootLayout({
   }) {
     return (
       <html lang="es">
-        <body className={bungee.className}>
+        <body className={`${inter.variable} ${bungee.variable}`}>
         <SessionProvider>
           {children}
         </SessionProvider>

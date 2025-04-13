@@ -69,7 +69,7 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
   const isProductsSection = pathname.startsWith("/dashboard/products") || pathname === "/dashboard/stock"
 
   return (
-    <div className="antialiased flex h-screen bg-soft_brown">
+    <div className="antialiased flex h-screen bg-soft_brown font-sans">
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={toggleSidebar} />}
 
@@ -77,13 +77,13 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
       <aside
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed md:absolute z-30 w-64 bg-soft_brown-400 text-white flex flex-col p-4 shadow-lg h-full transition-transform duration-300 ease-in-out`}
+        } fixed md:absolute z-30 w-64 bg-soft_brown-400 font-bungee text-white flex flex-col p-4 shadow-lg h-full transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between items-center">
           <Image src="/Isotipo.png" alt="Señor Sabueso" width={120} height={38} priority className="mx-auto" />
           {isMobile && (
             <button onClick={toggleSidebar} className="text-dark_moss_green-400">
-              <X className="h-6 w-6" />
+              <X className="h-6 w-6" />a
             </button>
           )}
         </div>

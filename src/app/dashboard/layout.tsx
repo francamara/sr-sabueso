@@ -15,10 +15,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <html lang="en">
-    <body>
+    <div>
       <DashboardWrapper>{children}</DashboardWrapper>
-    </body>
-  </html>
+    </div>
   );
 }

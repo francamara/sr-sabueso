@@ -1,13 +1,27 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Product } from "../../../models";
 
 type Brand = { id: number; name: string };
 type Animal = { id: number; name: string };
 
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  weight: number;
+  extra_weight: number;
+  retail_price: number;
+  stock: number;
+  sku: string;
+  barcode: string;
+  brand: Brand;
+  animal: Animal;
+};
+
 const tableHeaders = [
+  { key: "name", label: "Nombre" },
   { key: "description", label: "Descripción" },
   { key: "weight", label: "Peso (kg)" },
   { key: "extra_weight", label: "Kg Gratis" },
@@ -19,14 +33,13 @@ const tableHeaders = [
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [barcode, setBarcode] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchSku, setSearchSku] = useState("");
   const [brands, setBrands] = useState<Brand[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
-
-  const [barcode, setBarcode] = useState("");
-  const [searchSku, setSearchSku] = useState("");
-  const [selectedBrandId, setSelectedBrandId] = useState("");
-  const [selectedAnimalId, setSelectedAnimalId] = useState("");
-
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedAnimal, setSelectedAnimal] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,12 +48,17 @@ export default function Products() {
 
   useEffect(() => {
     if (!Array.isArray(products)) return;
-
     let filtered = [...products];
 
     if (barcode.trim()) {
       filtered = filtered.filter((p) =>
         p.barcode?.toLowerCase().includes(barcode.toLowerCase())
+      );
+    }
+
+    if (searchName.trim()) {
+      filtered = filtered.filter((p) =>
+        p.name?.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
@@ -50,29 +68,29 @@ export default function Products() {
       );
     }
 
-    if (selectedBrandId) {
-      filtered = filtered.filter((p) => p.brand_id === parseInt(selectedBrandId));
+    if (selectedBrand) {
+      filtered = filtered.filter((p) => p.brand.id === parseInt(selectedBrand));
     }
 
-    if (selectedAnimalId) {
-      filtered = filtered.filter((p) => p.animal_id === parseInt(selectedAnimalId));
+    if (selectedAnimal) {
+      filtered = filtered.filter((p) => p.animal.id === parseInt(selectedAnimal));
     }
 
     setFilteredProducts(filtered);
-  }, [barcode, searchSku, selectedBrandId, selectedAnimalId, products]);
+  }, [barcode, searchName, searchSku, selectedBrand, selectedAnimal, products]);
 
   const fetchInitialData = async () => {
     try {
       const [productsRes, attributesRes] = await Promise.all([
-        axios.get<Product[]>("/api/products"),
+        axios.get("/api/products"),
         axios.get("/api/products/attributes"),
       ]);
       setProducts(productsRes.data);
       setFilteredProducts(productsRes.data);
-      setBrands(attributesRes.data.brands);
-      setAnimals(attributesRes.data.animals);
+      setBrands(attributesRes.data.brands || []);
+      setAnimals(attributesRes.data.animals || []);
     } catch (error) {
-      console.error("Error cargando datos:", error);
+      console.error("Error fetching data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -88,65 +106,56 @@ export default function Products() {
 
   return (
     <div className="flex flex-col min-h-screen pb-20 px-6 font-[family-name:var(--font-geist-sans)]">
-      {/* Search Section */}
-      <div className="flex flex-wrap gap-4 w-full bg-gray-100 p-4 rounded-md shadow-sm text-gray-800">
+      <div className="flex flex-wrap gap-4 w-full bg-gray-100 p-4 rounded-md shadow-sm">
         <input
           type="text"
-          className="p-2 border rounded-md text-gray-800"
-          placeholder="Código de Barras"
+          className="p-2 border rounded-md"
+          placeholder="Buscar por código de barras"
           value={barcode}
           onChange={(e) => setBarcode(e.target.value)}
         />
         <input
           type="text"
-          className="p-2 border rounded-md text-gray-800"
-          placeholder="SKU"
+          className="p-2 border rounded-md"
+          placeholder="Buscar por nombre"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+        <input
+          type="text"
+          className="p-2 border rounded-md"
+          placeholder="Buscar por SKU"
           value={searchSku}
           onChange={(e) => setSearchSku(e.target.value)}
         />
         <select
-          value={selectedBrandId}
-          onChange={(e) => setSelectedBrandId(e.target.value)}
-          className="p-2 border rounded-md text-gray-800"
-          aria-label="Filtrar por marca"
-          title="Filtrar por marca"
+          className="p-2 border rounded-md"
+          value={selectedBrand}
+          onChange={(e) => setSelectedBrand(e.target.value)}
+          title="Marca"
         >
-          <option value="">Marca</option>
-          {brands.map((b) => (
-            <option key={b.id} value={b.id}>{b.name}</option>
+          <option value="">Filtrar por Marca</option>
+          {brands.map((brand) => (
+            <option key={brand.id} value={brand.id}>
+              {brand.name}
+            </option>
           ))}
         </select>
         <select
-          value={selectedAnimalId}
-          onChange={(e) => setSelectedAnimalId(e.target.value)}
           className="p-2 border rounded-md"
-          aria-label="Filtrar por animal"
-          title="Filtrar por animal"
+          value={selectedAnimal}
+          onChange={(e) => setSelectedAnimal(e.target.value)}
+          title="animal"
         >
-          <option value="">Animal</option>
-          {animals.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
+          <option value="">Filtrar por Animal</option>
+          {animals.map((animal) => (
+            <option key={animal.id} value={animal.id}>
+              {animal.name}
+            </option>
           ))}
         </select>
-
-        {/* Botón para limpiar filtros */}
-        <button
-          onClick={() => {
-            setBarcode("");
-            setSearchSku("");
-            setSelectedBrandId("");
-            setSelectedAnimalId("");
-            setFilteredProducts(products); // Vuelve a mostrar todos los productos
-          }}
-          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
-          aria-label="Limpiar filtros"
-          title="Limpiar filtros"
-        >
-          ❌ Limpiar filtros
-        </button>
       </div>
 
-      {/* Product Table */}
       <div className="overflow-x-auto w-full mt-6">
         {filteredProducts.length > 0 ? (
           <table className="table-auto w-full text-black border-collapse">
