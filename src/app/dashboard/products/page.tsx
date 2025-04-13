@@ -4,169 +4,179 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Product } from "../../../models";
 
+type Brand = { id: number; name: string };
+type Animal = { id: number; name: string };
+
 const tableHeaders = [
-  { key: "name", label: "Name" },
-  { key: "description", label: "Description" },
-  { key: "weight", label: "Weight" },
-  { key: "extraWeight", label: "Kg Gratis" },
-  { key: "retailPrice", label: "Precio Publico" },
+  { key: "description", label: "Descripción" },
+  { key: "weight", label: "Peso (kg)" },
+  { key: "extra_weight", label: "Kg Gratis" },
+  { key: "retail_price", label: "Precio Público" },
   { key: "stock", label: "Stock" },
-  { key: "uniqueCode", label: "Codigo Interno" },
-  { key: "button", label: "Agregar Pedido" },
+  { key: "sku", label: "Código Interno" },
 ];
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [phoneNumber, setPhoneNumber] = useState<number>(0);
-  const [streetAddress, setStreetAddress] = useState<string>("");
-  const [barcode, setBarcode] = useState<string>("");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [animals, setAnimals] = useState<Animal[]>([]);
+
+  const [barcode, setBarcode] = useState("");
+  const [searchSku, setSearchSku] = useState("");
+  const [selectedBrandId, setSelectedBrandId] = useState("");
+  const [selectedAnimalId, setSelectedAnimalId] = useState("");
+
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts();
+    fetchInitialData();
   }, []);
 
-  const fetchProducts = async () => {
+  useEffect(() => {
+    if (!Array.isArray(products)) return;
+
+    let filtered = [...products];
+
+    if (barcode.trim()) {
+      filtered = filtered.filter((p) =>
+        p.barcode?.toLowerCase().includes(barcode.toLowerCase())
+      );
+    }
+
+    if (searchSku.trim()) {
+      filtered = filtered.filter((p) =>
+        p.sku?.toLowerCase().includes(searchSku.toLowerCase())
+      );
+    }
+
+    if (selectedBrandId) {
+      filtered = filtered.filter((p) => p.brand_id === parseInt(selectedBrandId));
+    }
+
+    if (selectedAnimalId) {
+      filtered = filtered.filter((p) => p.animal_id === parseInt(selectedAnimalId));
+    }
+
+    setFilteredProducts(filtered);
+  }, [barcode, searchSku, selectedBrandId, selectedAnimalId, products]);
+
+  const fetchInitialData = async () => {
     try {
-      const response = await axios.get<Product[]>("/api/products");
-      setProducts(response.data);
+      const [productsRes, attributesRes] = await Promise.all([
+        axios.get<Product[]>("/api/products"),
+        axios.get("/api/products/attributes"),
+      ]);
+      setProducts(productsRes.data);
+      setFilteredProducts(productsRes.data);
+      setBrands(attributesRes.data.brands);
+      setAnimals(attributesRes.data.animals);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error cargando datos:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleOpenModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
-    setPhoneNumber(0);
-    setStreetAddress("");
-    setQuantity(1);
-  };
-
-  const handleOrderSubmit = () => {
-    handleCloseModal();
-  };
+  if (isLoading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-soft_brown-100 text-dark_moss_green-400">
+        <div className="text-xl font-semibold animate-pulse">Cargando productos...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen pb-20 font-[family-name:var(--font-geist-sans)] px-6">
-      {/* Barcode Input Section */}
-      <div className="flex flex-wrap items-center gap-4 w-full bg-gray-100 p-4 rounded-md shadow-sm">
-        <label className="text-gray-700 text-lg font-semibold whitespace-nowrap">Código de Barras:</label>
-        
+    <div className="flex flex-col min-h-screen pb-20 px-6 font-[family-name:var(--font-geist-sans)]">
+      {/* Search Section */}
+      <div className="flex flex-wrap gap-4 w-full bg-gray-100 p-4 rounded-md shadow-sm text-gray-800">
         <input
-          tabIndex={0}
-          title="barcode"
-          type="number"
-          className="p-2 border rounded-md flex-grow min-w-0"
+          type="text"
+          className="p-2 border rounded-md text-gray-800"
+          placeholder="Código de Barras"
           value={barcode}
           onChange={(e) => setBarcode(e.target.value)}
         />
-        
-        <button
-          className="px-4 py-2 bg-moss_green-400 hover:bg-moss_green-500 text-white font-bold rounded whitespace-nowrap"
+        <input
+          type="text"
+          className="p-2 border rounded-md text-gray-800"
+          placeholder="SKU"
+          value={searchSku}
+          onChange={(e) => setSearchSku(e.target.value)}
+        />
+        <select
+          value={selectedBrandId}
+          onChange={(e) => setSelectedBrandId(e.target.value)}
+          className="p-2 border rounded-md text-gray-800"
+          aria-label="Filtrar por marca"
+          title="Filtrar por marca"
         >
-          Buscar
+          <option value="">Marca</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </select>
+        <select
+          value={selectedAnimalId}
+          onChange={(e) => setSelectedAnimalId(e.target.value)}
+          className="p-2 border rounded-md"
+          aria-label="Filtrar por animal"
+          title="Filtrar por animal"
+        >
+          <option value="">Animal</option>
+          {animals.map((a) => (
+            <option key={a.id} value={a.id}>{a.name}</option>
+          ))}
+        </select>
+
+        {/* Botón para limpiar filtros */}
+        <button
+          onClick={() => {
+            setBarcode("");
+            setSearchSku("");
+            setSelectedBrandId("");
+            setSelectedAnimalId("");
+            setFilteredProducts(products); // Vuelve a mostrar todos los productos
+          }}
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+          aria-label="Limpiar filtros"
+          title="Limpiar filtros"
+        >
+          ❌ Limpiar filtros
         </button>
       </div>
 
       {/* Product Table */}
       <div className="overflow-x-auto w-full mt-6">
-        <table className="table-auto w-full text-black border-collapse">
-          <thead className="bg-dark_moss_green-500 text-white">
-            <tr>
-              {tableHeaders.map((header) => (
-                <th key={header.key} className="p-3 text-left">{header.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product, index) => (
-              <tr key={product.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+        {filteredProducts.length > 0 ? (
+          <table className="table-auto w-full text-black border-collapse">
+            <thead className="bg-dark_moss_green-500 text-white">
+              <tr>
                 {tableHeaders.map((header) => (
-                  <td key={header.key} className="p-3 border-t">
-                    {header.key === "button" ? (
-                      <button
-                        onClick={() => handleOpenModal(product)}
-                        className="px-4 py-2 bg-moss_green-400 hover:bg-moss_green-500 text-white font-bold rounded"
-                      >
-                        Agregar
-                      </button>
-                    ) : header.key === "weight" ? (
-                      `${product[header.key as keyof Product]} kg`
-                    ) : (
-                      product[header.key as keyof Product]?.toString() ?? ""
-                    )}
-                  </td>
+                  <th key={header.key} className="p-3 text-left">
+                    {header.label}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredProducts.map((product, index) => (
+                <tr key={product.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                  {tableHeaders.map((header) => (
+                    <td key={header.key} className="p-3 border-t">
+                      {header.key === "retail_price" && typeof product[header.key as keyof Product] === "number"
+                        ? `$${(product[header.key as keyof Product] as number).toFixed(2)}`
+                        : product[header.key as keyof Product]?.toString() ?? ""}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center text-gray-500 mt-8">No hay productos para mostrar</div>
+        )}
       </div>
-
-      {/* Modal Component */}
-      {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-gray-700">
-            <h2 className="text-xl font-bold mb-4">Nuevo Pedido</h2>
-            <p className="text-gray-700">{selectedProduct.name}</p>
-            <p>Kilos: {selectedProduct.weight}kg</p>
-            <p>Kilos gratis: {selectedProduct.extra_weight}kg</p>
-
-            {/* Inputs Section */}
-            <div className="flex flex-col gap-3 mt-4">
-              <label className="text-gray-600">Cantidad:</label>
-              <input
-                title="quantity"
-                type="number"
-                className="w-full p-2 border rounded-md"
-                value={quantity}
-                min={1}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  if (val < 1) return;
-                  setQuantity(val);
-                }}
-              />
-
-              <label className="text-gray-600">Número de Teléfono:</label>
-              <input
-                title="phoneNumber"
-                type="number"
-                className="w-full p-2 border rounded-md"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(Number(e.target.value))}
-              />
-
-              <label className="text-gray-600">Dirección:</label>
-              <input
-                title="streetAddress"
-                type="text"
-                className="w-full p-2 border rounded-md"
-                value={streetAddress}
-                onChange={(e) => setStreetAddress(e.target.value)}
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end mt-6">
-              <button className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2" onClick={handleCloseModal}>
-                Cancelar
-              </button>
-              <button className="text-white px-4 py-2 rounded-md bg-moss_green-400 hover:bg-moss_green-500" onClick={handleOrderSubmit}>
-                Confirmar Pedido
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
