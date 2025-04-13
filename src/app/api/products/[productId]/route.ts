@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
+export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
@@ -15,22 +15,62 @@ export async function GET(
       );
     }
 
-    const product = await prisma.product.findFirst({
-      where: { sku: productId },
-    });
+    // Obtener el cuerpo de la solicitud (datos para actualizar)
+    const {
+      weight,
+      extra_weight,
+      retail_price,
+      stock,
+      barcode,
+      wholesale_price,
+      brand_id,
+      animal_id,
+      product_line_id,
+      animal_age_id,
+      animal_size_id,
+    } = await req.json();
 
-    if (!product) {
+    // Verificar que los campos obligatorios estén presentes
+    if (
+      !weight ||
+      !retail_price ||
+      !stock ||
+      !barcode ||
+      !wholesale_price ||
+      !brand_id ||
+      !animal_id ||
+      !product_line_id ||
+      !animal_age_id
+    ) {
       return NextResponse.json(
-        { message: "Producto no encontrado" },
-        { status: 404 }
+        { message: "Faltan campos obligatorios" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(product, { status: 200 });
+    // Actualizar el producto en la base de datos
+    const updatedProduct = await prisma.product.update({
+      where: { sku: productId }, // Asegúrate de que 'sku' sea único
+      data: {
+        weight,
+        extra_weight,
+        retail_price,
+        wholesale_price,
+        barcode,
+        stock,
+        brand: { connect: { id: brand_id } },
+        animal: { connect: { id: animal_id } },
+        productLine: { connect: { id: product_line_id } },
+        animalAge: { connect: { id: animal_age_id } },
+        ...(animal_size_id ? { animalSize: { connect: { id: animal_size_id } } } : {}),
+      },
+    });
+
+    return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
-    console.error("Error en la API de productos:", error);
+    console.error("Error al actualizar producto:", error);
     return NextResponse.json(
-      { message: "Error al obtener el producto", error },
+      { message: "Error al actualizar el producto", error },
       { status: 500 }
     );
   }
