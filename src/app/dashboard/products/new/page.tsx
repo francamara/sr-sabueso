@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -21,7 +21,6 @@ export default function NewProductPage() {
   const [filteredLines, setFilteredLines] = useState<Line[]>([]);
   const [barcodeChecked, setBarcodeChecked] = useState(false);
   const [barcodeError, setBarcodeError] = useState('');
-
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -39,6 +38,63 @@ export default function NewProductPage() {
     animal_size_id: '',
   });
 
+  const generateSKU = useCallback(() => {
+    if (
+      brands.length === 0 ||
+      lines.length === 0 ||
+      animals.length === 0 ||
+      animalAges.length === 0
+    ) return '';
+  
+    const brand = brands.find(b => b.id === parseInt(formData.brand_id));
+    const line = lines.find(l => l.id === parseInt(formData.line_id));
+    const animal = animals.find(a => a.id === parseInt(formData.animal_id));
+    const age = animalAges.find(a => a.id === parseInt(formData.animal_age_id));
+    const size = animalSizes.find(s => s.id === parseInt(formData.animal_size_id));
+    const weight = formData.weight;
+    const extra = formData.extra_weight && parseFloat(formData.extra_weight) > 0;
+  
+    const brandPart = brand
+      ? brand.name.trim().split(' ').length === 1
+        ? brand.name.substring(0, 2).toUpperCase()
+        : brand.name
+            .split(' ')
+            .slice(0, 2)
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+      : '';
+  
+    const linePart = line ? line.name.substring(0, 3).toUpperCase() : '';
+    const animalPart = animal ? animal.name.substring(0, 3).toUpperCase() : '';
+    const agePart = age ? age.name.substring(0, 3).toUpperCase() : '';
+    const sizePart = size ? size.name.substring(0, 3).toUpperCase() : '';
+    const weightPart = weight || '';
+  
+    let sku = brandPart;
+  
+    if (linePart) sku += `-${linePart}`;
+    if (animalPart || agePart || sizePart) sku += `-${animalPart}${agePart}${sizePart}`;
+    if (weightPart) sku += `-${weightPart}`;
+    if (extra) sku += `-E`;
+  
+    return sku;
+  }, [
+    brands,
+    lines,
+    animals,
+    animalAges,
+    animalSizes,
+    formData.brand_id,
+    formData.line_id,
+    formData.animal_id,
+    formData.animal_age_id,
+    formData.animal_size_id,
+    formData.weight,
+    formData.extra_weight
+  ]);
+  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -51,6 +107,13 @@ export default function NewProductPage() {
       setFilteredLines([]);
     }
   }, [formData.brand_id, lines]);
+
+  useEffect(() => {
+    const sku = generateSKU();
+    console.log("SKU generado:", sku); // 👈 Agregá esto
+    setFormData(prev => ({ ...prev, sku }));
+  }, [generateSKU]);
+  
 
   const fetchData = async () => {
     try {
@@ -67,11 +130,11 @@ export default function NewProductPage() {
 
   const checkBarcode = async () => {
     if (!formData.barcode) return;
-  
+
     setIsCheckingBarcode(true);
     setBarcodeError('');
     setBarcodeChecked(false);
-  
+
     try {
       const res = await axios.get(`/api/products/check-barcode?barcode=${formData.barcode}`);
       if (res.data) {
@@ -124,7 +187,14 @@ export default function NewProductPage() {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-screen-xl bg-white rounded-xl p-8 shadow-lg"
       >
-        <h1 className="sm:col-span-2 lg:col-span-3 text-3xl font-bold mb-4">Nuevo Producto</h1>
+        <div className="sm:col-span-2 lg:col-span-3 mb-4 flex flex-col lg:flex-row items-start lg:items-center gap-2">
+          <h1 className="text-3xl font-bold">Nuevo Producto</h1>
+          {formData.sku && (
+            <span className="text-lg font-mono bg-gray-100 text-dark_moss_green-600 px-3 py-1 rounded">
+              SKU: {formData.sku}
+            </span>
+          )}
+        </div>
 
         <div className="sm:col-span-2 lg:col-span-3">
           <label htmlFor="barcode" className="block text-sm font-semibold mb-1">
@@ -140,7 +210,7 @@ export default function NewProductPage() {
               onChange={handleChange}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  e.preventDefault(); // Previene el submit del form
+                  e.preventDefault();
                   checkBarcode();
                 }
               }}
@@ -163,25 +233,25 @@ export default function NewProductPage() {
         <SelectField label="Edad del Animal" name="animal_age_id" value={formData.animal_age_id} onChange={handleChange} options={animalAges} disabled={!barcodeChecked} />
         <SelectField label="Tamaño del Animal" name="animal_size_id" value={formData.animal_size_id} onChange={handleChange} options={animalSizes} allowEmpty disabled={!barcodeChecked} />
 
-        {[
-          { name: 'weight', label: 'Peso (kg)' },
-          { name: 'extra_weight', label: 'Kg Gratis' },
-          { name: 'retail_price', label: 'Precio Público' },
-          { name: 'wholesale_price', label: 'Precio Mayorista' },
-          { name: 'stock', label: 'Stock' },
-        ].map((field) => (
-          <div key={field.name}>
-            <label htmlFor={field.name} className="block text-sm font-semibold mb-1">{field.label}</label>
+        {["weight", "extra_weight", "retail_price", "wholesale_price", "stock"].map(name => (
+          <div key={name}>
+            <label htmlFor={name} className="block text-sm font-semibold mb-1">
+              {name === "weight" ? "Peso (kg)" :
+               name === "extra_weight" ? "Kg Gratis" :
+               name === "retail_price" ? "Precio Público" :
+               name === "wholesale_price" ? "Precio Mayorista" :
+               name === "stock" ? "Stock" : name}
+            </label>
             <input
               type="text"
-              id={field.name}
-              name={field.name}
-              placeholder={field.label}
-              value={formData[field.name as keyof typeof formData]}
+              id={name}
+              name={name}
+              placeholder={name}
+              value={formData[name as keyof typeof formData]}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-dark_moss_green-200 rounded-md"
               disabled={!barcodeChecked}
-              required={field.name !== 'extra_weight'}
+              required={name !== "extra_weight"}
             />
           </div>
         ))}
@@ -198,9 +268,9 @@ export default function NewProductPage() {
       </form>
       {isCheckingBarcode && (
         <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-            <div className="w-16 h-16 border-4 border-dark_moss_green-400 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-dark_moss_green-400 border-t-transparent rounded-full animate-spin"></div>
         </div>
-       )}  
+      )}
     </div>
   );
 }
