@@ -170,7 +170,7 @@ export default function NewProductPage() {
         wholesale_price: parseFloat(formData.wholesale_price),
         stock: parseInt(formData.stock),
         brand_id: parseInt(formData.brand_id),
-        product_line_id: formData.line_id ? parseInt(formData.line_id) : null,
+        product_line_id: parseInt(formData.line_id),
         animal_id: parseInt(formData.animal_id),
         animal_age_id: parseInt(formData.animal_age_id),
         animal_size_id: formData.animal_size_id ? parseInt(formData.animal_size_id) : null,
@@ -228,15 +228,7 @@ export default function NewProductPage() {
         </div>
 
         <SelectField label="Marca" name="brand_id" value={formData.brand_id} onChange={handleChange} options={brands} disabled={!barcodeChecked} />
-        <SelectField
-          label="Línea"
-          name="line_id"
-          value={formData.line_id}
-          onChange={handleChange}
-          options={filteredLines}
-          allowEmpty
-          disabled={!formData.brand_id || !barcodeChecked}
-        />
+        <SelectField label="Línea" name="line_id" value={formData.line_id} onChange={handleChange} options={filteredLines} disabled={!formData.brand_id || !barcodeChecked} />
         <SelectField label="Animal" name="animal_id" value={formData.animal_id} onChange={handleChange} options={animals} disabled={!barcodeChecked} />
         <SelectField label="Edad del Animal" name="animal_age_id" value={formData.animal_age_id} onChange={handleChange} options={animalAges} disabled={!barcodeChecked} />
         <SelectField label="Tamaño del Animal" name="animal_size_id" value={formData.animal_size_id} onChange={handleChange} options={animalSizes} allowEmpty disabled={!barcodeChecked} />
