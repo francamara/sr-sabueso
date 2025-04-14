@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       wholesale_price,
       brand_id,
       animal_id,
-      product_line_id,
+      product_line_id, // ahora opcional
       animal_age_id,
       animal_size_id,
     } = await req.json();
@@ -39,7 +39,6 @@ export async function POST(req: Request) {
     if (wholesale_price == null) missingFields.push("wholesale_price");
     if (brand_id == null) missingFields.push("brand_id");
     if (animal_id == null) missingFields.push("animal_id");
-    if (product_line_id == null) missingFields.push("product_line_id");
     if (animal_age_id == null) missingFields.push("animal_age_id");
 
     if (missingFields.length > 0) {
@@ -53,22 +52,22 @@ export async function POST(req: Request) {
     // Obtener datos relacionados
     const [brand, line, animal, age, size] = await Promise.all([
       prisma.brand.findUnique({ where: { id: brand_id } }),
-      prisma.productLine.findUnique({ where: { id: product_line_id } }),
+      product_line_id ? prisma.productLine.findUnique({ where: { id: product_line_id } }) : null,
       prisma.animal.findUnique({ where: { id: animal_id } }),
       prisma.animalAge.findUnique({ where: { id: animal_age_id } }),
       animal_size_id ? prisma.animalSize.findUnique({ where: { id: animal_size_id } }) : null,
     ]);
 
-    if (!brand || !line || !animal || !age) {
+    if (!brand || !animal || !age) {
       return NextResponse.json({ error: "Faltan datos de referencia" }, { status: 400 });
     }
 
     // Generar descripción
-    const description = `${brand.name} ${line.name} ${animal.name} ${age.name}${
+    const description = `${brand.name}${line ? ` ${line.name}` : ""} ${animal.name} ${age.name}${
       size ? ` ${size.name}` : ""
     } x${weight}kg`;
 
-    // Generar SKU (iniciales + peso)
+    // Generar SKU
     const getInitials = (str: string) =>
       str
         .split(" ")
@@ -77,7 +76,7 @@ export async function POST(req: Request) {
 
     const skuParts = [
       getInitials(brand.name),
-      getInitials(line.name),
+      line ? getInitials(line.name) : null,
       getInitials(animal.name),
       getInitials(age.name),
       size ? getInitials(size.name) : null,
@@ -98,8 +97,8 @@ export async function POST(req: Request) {
         stock,
         brand: { connect: { id: brand_id } },
         animal: { connect: { id: animal_id } },
-        productLine: { connect: { id: product_line_id } },
         animalAge: { connect: { id: animal_age_id } },
+        ...(product_line_id ? { productLine: { connect: { id: product_line_id } } } : {}),
         ...(animal_size_id ? { animalSize: { connect: { id: animal_size_id } } } : {}),
       },
     });
@@ -110,3 +109,4 @@ export async function POST(req: Request) {
     return new NextResponse("Error creando producto", { status: 500 });
   }
 }
+
