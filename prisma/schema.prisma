@@ -111,8 +111,8 @@ model Product {
   id               Int             @id @default(autoincrement())
   brand_id         Int
   brand            Brand           @relation(fields: [brand_id], references: [id])
-  productLineId  Int
-  productLine    ProductLine @relation(fields: [productLineId], references: [id])
+  productLineId    Int
+  productLine      ProductLine @relation(fields: [productLineId], references: [id])
   animal_id        Int
   animal           Animal          @relation(fields: [animal_id], references: [id])
   animal_age_id    Int
