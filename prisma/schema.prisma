@@ -112,13 +112,12 @@ model Product {
   brand_id         Int
   brand            Brand           @relation(fields: [brand_id], references: [id])
   productLineId    Int
-  productLine      ProductLine @relation(fields: [productLineId], references: [id])
+  productLine      ProductLine     @relation(fields: [productLineId], references: [id])
   animal_id        Int
   animal           Animal          @relation(fields: [animal_id], references: [id])
   animal_age_id    Int
   animalAge        AnimalAge       @relation(fields: [animal_age_id], references: [id])
-  animal_size_id   Int?
-  animalSize       AnimalSize?     @relation(fields: [animal_size_id], references: [id])
+  animalSizes      AnimalSize[]
   description      String
   sku              String          @unique
   barcode          String          @unique
