@@ -77,7 +77,7 @@ model UserAddress {
 
 model Animal {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @unique
   products Product[]
 }
 model Brand {
@@ -97,13 +97,13 @@ model ProductLine {
 
 model AnimalAge {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @unique
   products Product[]
 }
 
 model AnimalSize {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @unique
   products Product[]
 }
 

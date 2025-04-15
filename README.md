@@ -11,10 +11,14 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## DB Seed
+This will apply the following content for development purposes
+Roles (admin)
+
+Animal (perro, gato)
+
+AnimalAge (cachorro, adulto, senior)
+
+AnimalSize (pequeño, mediano, grande)
 ```
 npx tsx prisma/seed.ts
-```
-## DB Sync with model
-```
-npx prisma migrate dev --name init && npx prisma generate
 ```
