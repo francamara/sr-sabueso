@@ -188,19 +188,6 @@ export default function NewProductPage() {
 
   return (
     <div className="w-full h-full flex justify-center items-center text-dark_moss_green-400 px-6">
-      <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-6">
-        {isSubmitting ? (
-          <LoadingSpinner size={28} color="#4b5d44" />
-        ) : (
-          <button
-            type="submit"
-            disabled={!barcodeChecked}
-            className="bg-dark_moss_green-500 hover:bg-dark_moss_green-600 text-white px-6 py-3 rounded text-lg shadow transition-all disabled:opacity-50"
-          >
-            Crear Producto
-          </button>
-        )}
-      </div>
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-screen-xl bg-white rounded-xl p-8 shadow-lg"
@@ -317,13 +304,17 @@ export default function NewProductPage() {
         ))}
 
         <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-6">
-          <button
-            type="submit"
-            disabled={!barcodeChecked}
-            className="bg-dark_moss_green-500 hover:bg-dark_moss_green-600 text-white px-6 py-3 rounded text-lg shadow transition-all disabled:opacity-50"
-          >
-            Crear Producto
-          </button>
+          {isSubmitting ? (
+            <LoadingSpinner size={28} color="#4b5d44" />
+          ) : (
+            <button
+              type="submit"
+              disabled={!barcodeChecked}
+              className="bg-dark_moss_green-500 hover:bg-dark_moss_green-600 text-white px-6 py-3 rounded text-lg shadow transition-all disabled:opacity-50"
+            >
+              Crear Producto
+            </button>
+          )}
         </div>
       </form>
       {isCheckingBarcode && (
