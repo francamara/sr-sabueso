@@ -1,20 +1,7 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // 🚫 Desactiva el ESLint automático de Next.js (ya usás FlatConfig manualmente)
+  eslint: { ignoreDuringBuilds: true },
+};
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends(
-    "next/core-web-vitals",
-    "next/typescript",
-    "plugin:prettier/recommended" // ← esta línea agrega Prettier
-  ),
-];
-
-export default eslintConfig;
+export default nextConfig;
