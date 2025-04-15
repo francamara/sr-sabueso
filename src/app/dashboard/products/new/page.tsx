@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type Brand = { id: number; name: string };
 type Line = { id: number; name: string; brand_id: number };
@@ -22,6 +23,8 @@ export default function NewProductPage() {
   const [barcodeChecked, setBarcodeChecked] = useState(false);
   const [barcodeError, setBarcodeError] = useState("");
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     barcode: "",
@@ -160,6 +163,7 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       await axios.post("/api/products", {
         ...formData,
@@ -169,7 +173,7 @@ export default function NewProductPage() {
         wholesale_price: parseFloat(formData.wholesale_price),
         stock: parseInt(formData.stock),
         brand_id: parseInt(formData.brand_id),
-        product_line_id: parseInt(formData.line_id),
+        product_line_id: formData.line_id ? parseInt(formData.line_id) : null,
         animal_id: parseInt(formData.animal_id),
         animal_age_id: parseInt(formData.animal_age_id),
         animal_size_id: formData.animal_size_id ? parseInt(formData.animal_size_id) : null,
@@ -177,11 +181,26 @@ export default function NewProductPage() {
       router.push("/dashboard/products");
     } catch (error) {
       console.error("Error al crear producto", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="w-full h-full flex justify-center items-center text-dark_moss_green-400 px-6">
+      <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-6">
+        {isSubmitting ? (
+          <LoadingSpinner size={28} color="#4b5d44" />
+        ) : (
+          <button
+            type="submit"
+            disabled={!barcodeChecked}
+            className="bg-dark_moss_green-500 hover:bg-dark_moss_green-600 text-white px-6 py-3 rounded text-lg shadow transition-all disabled:opacity-50"
+          >
+            Crear Producto
+          </button>
+        )}
+      </div>
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-screen-xl bg-white rounded-xl p-8 shadow-lg"
