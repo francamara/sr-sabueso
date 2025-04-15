@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { Bungee } from "next/font/google";
@@ -7,22 +7,22 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 
 const bungee = Bungee({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-bungee',
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bungee",
 });
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const res = await fetch("/api/register", {
@@ -37,12 +37,14 @@ export default function RegisterPage() {
       router.push("/check-email");
     } else {
       const data = await res.json();
-      setError(data.error || 'Ocurrió un error al registrarse');
+      setError(data.error || "Ocurrió un error al registrarse");
     }
   };
 
   return (
-    <div className={`min-h-screen bg-soft_brown flex flex-col justify-center items-center ${bungee.className}`}>
+    <div
+      className={`min-h-screen bg-soft_brown flex flex-col justify-center items-center ${bungee.className}`}
+    >
       <div className="bg-old_lace-600 p-10 rounded-lg shadow-md w-full max-w-md">
         <div className="flex justify-center mb-6">
           <Image src="/Isotipo.png" alt="Señor Sabueso" width={120} height={38} priority />
@@ -50,7 +52,9 @@ export default function RegisterPage() {
         <h1 className="text-3xl text-center text-dark_moss_green-400 mb-6">Crear Cuenta</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-dark_moss_green-400 mb-1">Usuario</label>
+            <label htmlFor="username" className="block text-dark_moss_green-400 mb-1">
+              Usuario
+            </label>
             <input
               type="text"
               id="username"
@@ -61,7 +65,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-dark_moss_green-400 mb-1">Email</label>
+            <label htmlFor="email" className="block text-dark_moss_green-400 mb-1">
+              Email
+            </label>
             <input
               type="email"
               id="email"
@@ -72,7 +78,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-dark_moss_green-400 mb-1">Contraseña</label>
+            <label htmlFor="password" className="block text-dark_moss_green-400 mb-1">
+              Contraseña
+            </label>
             <input
               type="password"
               id="password"
@@ -83,14 +91,9 @@ export default function RegisterPage() {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button
-            type="submit"
-            loading={loading}
-            className="w-full"
-
-          >
-          Registrarse
-        </Button>
+          <Button type="submit" loading={loading} className="w-full">
+            Registrarse
+          </Button>
         </form>
       </div>
     </div>

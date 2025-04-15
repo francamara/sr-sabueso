@@ -14,7 +14,6 @@ export async function GET() {
   }
 }
 
-
 export async function POST(req: Request) {
   try {
     const {
@@ -103,7 +102,6 @@ export async function POST(req: Request) {
         ...(animal_size_id ? { animalSizes: { connect: [{ id: animal_size_id }] } } : {}),
       },
     });
-    
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {

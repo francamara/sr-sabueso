@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu, X, ChevronDown, ChevronUp, Home, Package, QrCode, ShoppingCart } from "lucide-react"
-import UserMenu from "./userMenu"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X, ChevronDown, ChevronUp, Home, Package, QrCode, ShoppingCart } from "lucide-react";
+import UserMenu from "./userMenu";
 
 function getPageName(pathname: string): string {
   const paths: { [key: string]: string } = {
@@ -17,61 +17,64 @@ function getPageName(pathname: string): string {
     "/dashboard/orders": "Pedidos",
     "/dashboard/products": "Productos",
     "/dashboard/products/new": "Crear Nuevo Producto",
-  }
+  };
 
-  return paths[pathname] || "Página desconocida"
+  return paths[pathname] || "Página desconocida";
 }
 
 export default function DashboardWrapper({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const pageName = getPageName(pathname)
+  const pathname = usePathname();
+  const pageName = getPageName(pathname);
 
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({
     products: false,
-  })
+  });
 
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
-        setSidebarOpen(true)
+        setSidebarOpen(true);
       } else {
-        setSidebarOpen(false)
+        setSidebarOpen(false);
       }
-    }
+    };
 
     // Initial check
-    checkIfMobile()
+    checkIfMobile();
 
     // Add event listener
-    window.addEventListener("resize", checkIfMobile)
+    window.addEventListener("resize", checkIfMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile)
-  }, [])
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   const toggleMenu = (menu: string) => {
     setOpenMenus((prev) => ({
       ...prev,
       [menu]: !prev[menu],
-    }))
-  }
+    }));
+  };
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+    setSidebarOpen(!sidebarOpen);
+  };
 
-  const isActive = (path: string) => pathname === path
-  const isProductsSection = pathname.startsWith("/dashboard/products") || pathname === "/dashboard/stock"
+  const isActive = (path: string) => pathname === path;
+  const isProductsSection =
+    pathname.startsWith("/dashboard/products") || pathname === "/dashboard/stock";
 
   return (
     <div className="antialiased flex h-screen bg-soft_brown font-sans">
       {/* Overlay for mobile when sidebar is open */}
-      {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={toggleSidebar} />}
+      {isMobile && sidebarOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={toggleSidebar} />
+      )}
 
       {/* Sidebar */}
       <aside
@@ -80,14 +83,23 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
         } fixed md:absolute z-30 w-64 bg-soft_brown-400 font-bungee text-white flex flex-col p-4 shadow-lg h-full transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between items-center">
-          <Image src="/Isotipo.png" alt="Señor Sabueso" width={120} height={38} priority className="mx-auto" />
+          <Image
+            src="/Isotipo.png"
+            alt="Señor Sabueso"
+            width={120}
+            height={38}
+            priority
+            className="mx-auto"
+          />
           {isMobile && (
             <button onClick={toggleSidebar} className="text-dark_moss_green-400">
               <X className="h-6 w-6" />a
             </button>
           )}
         </div>
-        <h2 className="font-bold my-4 text-dark_moss_green-400 text-center text-2xl md:text-4xl">Señor Sabueso</h2>
+        <h2 className="font-bold my-4 text-dark_moss_green-400 text-center text-2xl md:text-4xl">
+          Señor Sabueso
+        </h2>
 
         <nav className="mt-6">
           <ul className="space-y-4">
@@ -117,7 +129,11 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
                   <span>Productos</span>
                 </div>
                 <span>
-                  {openMenus.products ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {openMenus.products ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
                 </span>
               </button>
               {openMenus.products && (
@@ -194,7 +210,11 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
       >
         <header className="bg-office_green-500 text-white p-4 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2">
-            <button onClick={toggleSidebar} className="text-white focus:outline-none" aria-label="Toggle Sidebar">
+            <button
+              onClick={toggleSidebar}
+              className="text-white focus:outline-none"
+              aria-label="Toggle Sidebar"
+            >
               <Menu className="h-6 w-6" />
             </button>
             <h1 className="text-xl font-semibold text-dark_moss_green-500">{pageName}</h1>
@@ -207,5 +227,5 @@ export default function DashboardWrapper({ children }: { children: React.ReactNo
         <main className="flex-1 p-4 md:p-6 bg-old_lace-600 overflow-y-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

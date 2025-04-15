@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 type Brand = { id: number; name: string };
 type Line = { id: number; name: string; brand_id: number };
@@ -20,22 +20,22 @@ export default function NewProductPage() {
 
   const [filteredLines, setFilteredLines] = useState<Line[]>([]);
   const [barcodeChecked, setBarcodeChecked] = useState(false);
-  const [barcodeError, setBarcodeError] = useState('');
+  const [barcodeError, setBarcodeError] = useState("");
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
 
   const [formData, setFormData] = useState({
-    barcode: '',
-    weight: '',
-    extra_weight: '',
-    retail_price: '',
-    wholesale_price: '',
-    stock: '',
-    sku: '',
-    brand_id: '',
-    line_id: '',
-    animal_id: '',
-    animal_age_id: '',
-    animal_size_id: '',
+    barcode: "",
+    weight: "",
+    extra_weight: "",
+    retail_price: "",
+    wholesale_price: "",
+    stock: "",
+    sku: "",
+    brand_id: "",
+    line_id: "",
+    animal_id: "",
+    animal_age_id: "",
+    animal_size_id: "",
   });
 
   const generateSKU = useCallback(() => {
@@ -44,40 +44,41 @@ export default function NewProductPage() {
       lines.length === 0 ||
       animals.length === 0 ||
       animalAges.length === 0
-    ) return '';
-  
-    const brand = brands.find(b => b.id === parseInt(formData.brand_id));
-    const line = lines.find(l => l.id === parseInt(formData.line_id));
-    const animal = animals.find(a => a.id === parseInt(formData.animal_id));
-    const age = animalAges.find(a => a.id === parseInt(formData.animal_age_id));
-    const size = animalSizes.find(s => s.id === parseInt(formData.animal_size_id));
+    )
+      return "";
+
+    const brand = brands.find((b) => b.id === parseInt(formData.brand_id));
+    const line = lines.find((l) => l.id === parseInt(formData.line_id));
+    const animal = animals.find((a) => a.id === parseInt(formData.animal_id));
+    const age = animalAges.find((a) => a.id === parseInt(formData.animal_age_id));
+    const size = animalSizes.find((s) => s.id === parseInt(formData.animal_size_id));
     const weight = formData.weight;
     const extra = formData.extra_weight && parseFloat(formData.extra_weight) > 0;
-  
+
     const brandPart = brand
-      ? brand.name.trim().split(' ').length === 1
+      ? brand.name.trim().split(" ").length === 1
         ? brand.name.substring(0, 2).toUpperCase()
         : brand.name
-            .split(' ')
+            .split(" ")
             .slice(0, 2)
-            .map(word => word[0])
-            .join('')
+            .map((word) => word[0])
+            .join("")
             .toUpperCase()
-      : '';
-  
-    const linePart = line ? line.name.substring(0, 3).toUpperCase() : '';
-    const animalPart = animal ? animal.name.substring(0, 3).toUpperCase() : '';
-    const agePart = age ? age.name.substring(0, 3).toUpperCase() : '';
-    const sizePart = size ? size.name.substring(0, 3).toUpperCase() : '';
-    const weightPart = weight || '';
-  
+      : "";
+
+    const linePart = line ? line.name.substring(0, 3).toUpperCase() : "";
+    const animalPart = animal ? animal.name.substring(0, 3).toUpperCase() : "";
+    const agePart = age ? age.name.substring(0, 3).toUpperCase() : "";
+    const sizePart = size ? size.name.substring(0, 3).toUpperCase() : "";
+    const weightPart = weight || "";
+
     let sku = brandPart;
-  
+
     if (linePart) sku += `-${linePart}`;
     if (animalPart || agePart || sizePart) sku += `-${animalPart}${agePart}${sizePart}`;
     if (weightPart) sku += `-${weightPart}`;
     if (extra) sku += `-E`;
-  
+
     return sku;
   }, [
     brands,
@@ -91,9 +92,8 @@ export default function NewProductPage() {
     formData.animal_age_id,
     formData.animal_size_id,
     formData.weight,
-    formData.extra_weight
+    formData.extra_weight,
   ]);
-  
 
   useEffect(() => {
     fetchData();
@@ -101,7 +101,7 @@ export default function NewProductPage() {
 
   useEffect(() => {
     if (formData.brand_id) {
-      const filtered = lines.filter(line => line.brand_id === parseInt(formData.brand_id));
+      const filtered = lines.filter((line) => line.brand_id === parseInt(formData.brand_id));
       setFilteredLines(filtered);
     } else {
       setFilteredLines([]);
@@ -111,13 +111,12 @@ export default function NewProductPage() {
   useEffect(() => {
     const sku = generateSKU();
     console.log("SKU generado:", sku); // 👈 Agregá esto
-    setFormData(prev => ({ ...prev, sku }));
+    setFormData((prev) => ({ ...prev, sku }));
   }, [generateSKU]);
-  
 
   const fetchData = async () => {
     try {
-      const res = await axios.get('/api/products/attributes');
+      const res = await axios.get("/api/products/attributes");
       setBrands(res.data.brands);
       setLines(res.data.lines);
       setAnimals(res.data.animals);
@@ -132,7 +131,7 @@ export default function NewProductPage() {
     if (!formData.barcode) return;
 
     setIsCheckingBarcode(true);
-    setBarcodeError('');
+    setBarcodeError("");
     setBarcodeChecked(false);
 
     try {
@@ -152,17 +151,17 @@ export default function NewProductPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === 'brand_id' ? { line_id: '' } : {})
+      ...(name === "brand_id" ? { line_id: "" } : {}),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('/api/products', {
+      await axios.post("/api/products", {
         ...formData,
         weight: parseFloat(formData.weight),
         extra_weight: formData.extra_weight ? parseFloat(formData.extra_weight) : 0,
@@ -175,9 +174,9 @@ export default function NewProductPage() {
         animal_age_id: parseInt(formData.animal_age_id),
         animal_size_id: formData.animal_size_id ? parseInt(formData.animal_size_id) : null,
       });
-      router.push('/dashboard/products');
+      router.push("/dashboard/products");
     } catch (error) {
-      console.error('Error al crear producto', error);
+      console.error("Error al crear producto", error);
     }
   };
 
@@ -227,20 +226,62 @@ export default function NewProductPage() {
           {barcodeError && <p className="text-red-500 text-sm mt-1">{barcodeError}</p>}
         </div>
 
-        <SelectField label="Marca" name="brand_id" value={formData.brand_id} onChange={handleChange} options={brands} disabled={!barcodeChecked} />
-        <SelectField label="Línea" name="line_id" value={formData.line_id} onChange={handleChange} options={filteredLines} disabled={!formData.brand_id || !barcodeChecked} />
-        <SelectField label="Animal" name="animal_id" value={formData.animal_id} onChange={handleChange} options={animals} disabled={!barcodeChecked} />
-        <SelectField label="Edad del Animal" name="animal_age_id" value={formData.animal_age_id} onChange={handleChange} options={animalAges} disabled={!barcodeChecked} />
-        <SelectField label="Tamaño del Animal" name="animal_size_id" value={formData.animal_size_id} onChange={handleChange} options={animalSizes} allowEmpty disabled={!barcodeChecked} />
+        <SelectField
+          label="Marca"
+          name="brand_id"
+          value={formData.brand_id}
+          onChange={handleChange}
+          options={brands}
+          disabled={!barcodeChecked}
+        />
+        <SelectField
+          label="Línea"
+          name="line_id"
+          value={formData.line_id}
+          onChange={handleChange}
+          options={filteredLines}
+          disabled={!formData.brand_id || !barcodeChecked}
+        />
+        <SelectField
+          label="Animal"
+          name="animal_id"
+          value={formData.animal_id}
+          onChange={handleChange}
+          options={animals}
+          disabled={!barcodeChecked}
+        />
+        <SelectField
+          label="Edad del Animal"
+          name="animal_age_id"
+          value={formData.animal_age_id}
+          onChange={handleChange}
+          options={animalAges}
+          disabled={!barcodeChecked}
+        />
+        <SelectField
+          label="Tamaño del Animal"
+          name="animal_size_id"
+          value={formData.animal_size_id}
+          onChange={handleChange}
+          options={animalSizes}
+          allowEmpty
+          disabled={!barcodeChecked}
+        />
 
-        {["weight", "extra_weight", "retail_price", "wholesale_price", "stock"].map(name => (
+        {["weight", "extra_weight", "retail_price", "wholesale_price", "stock"].map((name) => (
           <div key={name}>
             <label htmlFor={name} className="block text-sm font-semibold mb-1">
-              {name === "weight" ? "Peso (kg)" :
-               name === "extra_weight" ? "Kg Gratis" :
-               name === "retail_price" ? "Precio Público" :
-               name === "wholesale_price" ? "Precio Mayorista" :
-               name === "stock" ? "Stock" : name}
+              {name === "weight"
+                ? "Peso (kg)"
+                : name === "extra_weight"
+                  ? "Kg Gratis"
+                  : name === "retail_price"
+                    ? "Precio Público"
+                    : name === "wholesale_price"
+                      ? "Precio Mayorista"
+                      : name === "stock"
+                        ? "Stock"
+                        : name}
             </label>
             <input
               type="text"
@@ -285,7 +326,15 @@ type SelectFieldProps = {
   disabled?: boolean;
 };
 
-function SelectField({ label, name, value, onChange, options, allowEmpty = false, disabled = false }: SelectFieldProps) {
+function SelectField({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  allowEmpty = false,
+  disabled = false,
+}: SelectFieldProps) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm font-semibold mb-1">
@@ -303,7 +352,9 @@ function SelectField({ label, name, value, onChange, options, allowEmpty = false
         {allowEmpty && <option value="">Sin especificar</option>}
         {!allowEmpty && <option value="">Seleccionar {label.toLowerCase()}</option>}
         {options.map((opt) => (
-          <option key={opt.id} value={opt.id}>{opt.name}</option>
+          <option key={opt.id} value={opt.id}>
+            {opt.name}
+          </option>
         ))}
       </select>
     </div>

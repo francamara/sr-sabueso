@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { FaBoxOpen, FaChartBar, FaClipboardList } from "react-icons/fa"; // Importando iconos
 
 export default function Home() {
-  const [latestOrders, setLatestOrders] = useState<{id: number, date: string, day: string, total: string}[]>([]);
+  const [latestOrders, setLatestOrders] = useState<
+    { id: number; date: string; day: string; total: string }[]
+  >([]);
 
   useEffect(() => {
     // Simulamos algunos pedidos para el placeholder
@@ -25,7 +27,9 @@ export default function Home() {
             <Link href="/dashboard/products/new" className="block select-none">
               <FaBoxOpen className="text-4xl text-dark_moss_green-400 mx-auto mb-4" />
               <h2 className="text-xl text-center text-dark_moss_green-400">Agregar Productos</h2>
-              <p className="text-center text-gray-600">Agregar y editar los productos del listado</p>
+              <p className="text-center text-gray-600">
+                Agregar y editar los productos del listado
+              </p>
             </Link>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer">
@@ -35,7 +39,7 @@ export default function Home() {
               <p className="text-center text-gray-600">Listar y filtrar todos los productos</p>
             </Link>
           </div>
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer">
             <Link href="/dashboard/orders" className="block select-none">
               <FaClipboardList className="text-4xl text-dark_moss_green-400 mx-auto mb-4" />
               <h2 className="text-xl text-center text-dark_moss_green-400">Pedidos</h2>
@@ -46,7 +50,9 @@ export default function Home() {
 
         {/* Gráfico de Productos (Placeholder) */}
         <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md w-full">
-          <h3 className="text-2xl font-semibold text-dark_moss_green-400 mb-4">Gráfico de Productos</h3>
+          <h3 className="text-2xl font-semibold text-dark_moss_green-400 mb-4">
+            Gráfico de Productos
+          </h3>
           <div className="w-full h-64 bg-gray-200 rounded-lg flex justify-center items-center">
             <p className="text-gray-500">Gráfico de productos - Placeholder</p>
           </div>

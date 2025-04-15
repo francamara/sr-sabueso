@@ -9,7 +9,8 @@ export default function CheckEmailPage() {
 
       <h1 className="text-4xl font-bold mb-4">¡Revisá tu email!</h1>
       <p className="max-w-md text-lg mb-8">
-        Te enviamos un correo para verificar tu cuenta. Hacé clic en el enlace para activar tu usuario y comenzar a pedirle alimento a tu mascota 🐶
+        Te enviamos un correo para verificar tu cuenta. Hacé clic en el enlace para activar tu
+        usuario y comenzar a pedirle alimento a tu mascota 🐶
       </p>
 
       <div className="flex flex-col gap-4 items-center">
@@ -30,4 +31,4 @@ export default function CheckEmailPage() {
       </div>
     </div>
   );
-};
+}

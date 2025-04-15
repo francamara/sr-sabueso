@@ -9,10 +9,7 @@ export async function PUT(
     const { productId } = await params;
 
     if (!productId) {
-      return NextResponse.json(
-        { message: "Falta el SKU en la URL" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Falta el SKU en la URL" }, { status: 400 });
     }
 
     // Obtener el cuerpo de la solicitud (datos para actualizar)
@@ -42,10 +39,7 @@ export async function PUT(
       !product_line_id ||
       !animal_age_id
     ) {
-      return NextResponse.json(
-        { message: "Faltan campos obligatorios" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Faltan campos obligatorios" }, { status: 400 });
     }
 
     // Actualizar el producto en la base de datos

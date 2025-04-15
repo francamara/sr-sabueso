@@ -4,7 +4,7 @@ const resend = new Resend(process.env.EMAIL_SERVER_PASSWORD!);
 
 export async function sendVerificationEmail(email: string, verifyUrl: string) {
   await resend.emails.send({
-    from: 'Señor Sabueso <no-reply@srsabueso.com>', // Tiene que estar verificado en Resend
+    from: "Señor Sabueso <no-reply@srsabueso.com>", // Tiene que estar verificado en Resend
     to: email,
     subject: "Verificá tu cuenta",
     html: `
@@ -18,7 +18,7 @@ export async function sendVerificationEmail(email: string, verifyUrl: string) {
 
 export async function reSendVerificationEmail(email: string, verifyUrl: string) {
   await resend.emails.send({
-    from: 'Señor Sabueso <no-reply@srsabueso.com>', // Tiene que estar verificado en Resend
+    from: "Señor Sabueso <no-reply@srsabueso.com>", // Tiene que estar verificado en Resend
     to: email,
     subject: "Verificá tu cuenta",
     html: `
@@ -29,4 +29,3 @@ export async function reSendVerificationEmail(email: string, verifyUrl: string) 
     `,
   });
 }
-

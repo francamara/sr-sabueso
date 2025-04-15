@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const roles = ['admin'];
-  const animals = ['perro', 'gato'];
-  const animalAges = ['cachorro', 'adulto', 'senior'];
-  const animalSizes = ['pequeño', 'mediano', 'grande'];
+  const roles = ["admin"];
+  const animals = ["perro", "gato"];
+  const animalAges = ["cachorro", "adulto", "senior"];
+  const animalSizes = ["pequeño", "mediano", "grande"];
 
   for (const role of roles) {
     await prisma.role.upsert({

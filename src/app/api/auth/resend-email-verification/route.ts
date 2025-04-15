@@ -18,9 +18,15 @@ export async function POST(req: NextRequest) {
     // Enviar el correo de verificación
     await sendVerificationEmail(email, verifyUrl);
 
-    return NextResponse.json({ message: "Correo de verificación reenviado con éxito." }, { status: 200 });
+    return NextResponse.json(
+      { message: "Correo de verificación reenviado con éxito." },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error reenviando correo de verificación:", error);
-    return NextResponse.json({ message: "Error al reenviar el correo de verificación", error }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error al reenviar el correo de verificación", error },
+      { status: 500 }
+    );
   }
 }

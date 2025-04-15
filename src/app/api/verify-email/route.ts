@@ -13,9 +13,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const verificationToken = await prisma.verificationToken.findUnique({
-      where: { token },
-    });
+    const verificationToken = await prisma.verificationToken.findUnique({ where: { token } });
 
     if (!verificationToken) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });

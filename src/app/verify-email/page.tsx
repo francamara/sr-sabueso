@@ -7,9 +7,9 @@ import { Bungee } from "next/font/google";
 import Button from "@/components/button";
 
 const bungee = Bungee({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-bungee',
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bungee",
 });
 
 function VerifyEmailContent() {
@@ -44,7 +44,8 @@ function VerifyEmailContent() {
           ¡Email verificado correctamente!
         </h1>
         <p className="text-lg mb-8">
-          Tu dirección de correo electrónico <strong>{email}</strong> ha sido verificada con éxito 🐶
+          Tu dirección de correo electrónico <strong>{email}</strong> ha sido verificada con éxito
+          🐶
         </p>
 
         <Button onClick={handleGoToLogin} className="w-full">

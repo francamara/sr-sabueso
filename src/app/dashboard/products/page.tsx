@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -67,19 +67,19 @@ export default function Products() {
     let filtered = [...products];
 
     if (barcode.trim()) {
-      filtered = filtered.filter(p => p.barcode.toLowerCase().includes(barcode.toLowerCase()));
+      filtered = filtered.filter((p) => p.barcode.toLowerCase().includes(barcode.toLowerCase()));
     }
 
     if (searchSku.trim()) {
-      filtered = filtered.filter(p => p.sku.toLowerCase().includes(searchSku.toLowerCase()));
+      filtered = filtered.filter((p) => p.sku.toLowerCase().includes(searchSku.toLowerCase()));
     }
 
     if (selectedBrand) {
-      filtered = filtered.filter(p => p.brand_id === parseInt(selectedBrand));
+      filtered = filtered.filter((p) => p.brand_id === parseInt(selectedBrand));
     }
 
     if (selectedAnimal) {
-      filtered = filtered.filter(p => p.animal_id === parseInt(selectedAnimal));
+      filtered = filtered.filter((p) => p.animal_id === parseInt(selectedAnimal));
     }
 
     // Ordenamiento
@@ -91,9 +91,7 @@ export default function Products() {
         if (aValue == null || bValue == null) return 0;
 
         if (typeof aValue === "string" && typeof bValue === "string") {
-          return sortOrder === "asc"
-            ? aValue.localeCompare(bValue)
-            : bValue.localeCompare(aValue);
+          return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         }
 
         if (typeof aValue === "number" && typeof bValue === "number") {
@@ -137,11 +135,9 @@ export default function Products() {
     }
   };
 
-  const getBrandName = (brand_id: number) =>
-    brands.find(b => b.id === brand_id)?.name || "-";
+  const getBrandName = (brand_id: number) => brands.find((b) => b.id === brand_id)?.name || "-";
 
-  const getAnimalName = (animal_id: number) =>
-    animals.find(a => a.id === animal_id)?.name || "-";
+  const getAnimalName = (animal_id: number) => animals.find((a) => a.id === animal_id)?.name || "-";
 
   const getArrow = (field: string) => {
     if (sortField === field) {
@@ -185,7 +181,9 @@ export default function Products() {
         >
           <option value="">Filtrar por Marca</option>
           {brands.map((brand) => (
-            <option key={brand.id} value={brand.id}>{brand.name}</option>
+            <option key={brand.id} value={brand.id}>
+              {brand.name}
+            </option>
           ))}
         </select>
         <select
@@ -196,7 +194,9 @@ export default function Products() {
         >
           <option value="">Filtrar por Animal</option>
           {animals.map((animal) => (
-            <option key={animal.id} value={animal.id}>{animal.name}</option>
+            <option key={animal.id} value={animal.id}>
+              {animal.name}
+            </option>
           ))}
         </select>
       </div>
@@ -220,7 +220,8 @@ export default function Products() {
                       className="p-4 cursor-pointer"
                       onClick={() => handleSortClick(header.key)}
                     >
-                      {header.label}{getArrow(header.key)}
+                      {header.label}
+                      {getArrow(header.key)}
                     </th>
                   ))}
                 </tr>
@@ -229,12 +230,16 @@ export default function Products() {
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 border-t">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${brandColors[product.brand_id] || "bg-gray-200 text-gray-700"}`}>
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${brandColors[product.brand_id] || "bg-gray-200 text-gray-700"}`}
+                      >
                         {getBrandName(product.brand_id)}
                       </span>
                     </td>
                     <td className="p-4 border-t">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${animalColors[product.animal_id] || "bg-gray-100 text-gray-700"}`}>
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${animalColors[product.animal_id] || "bg-gray-100 text-gray-700"}`}
+                      >
                         {getAnimalName(product.animal_id)}
                       </span>
                     </td>
@@ -243,9 +248,10 @@ export default function Products() {
                         key={header.key}
                         className={`p-4 border-t ${header.key === "retail_price" ? "font-bold" : ""}`}
                       >
-                        {header.key === "retail_price" && typeof product[header.key as keyof Product] === "number"
+                        {header.key === "retail_price" &&
+                        typeof product[header.key as keyof Product] === "number"
                           ? formatPrice(product[header.key as keyof Product] as number)
-                          : product[header.key as keyof Product]?.toString() ?? ""}
+                          : (product[header.key as keyof Product]?.toString() ?? "")}
                       </td>
                     ))}
                   </tr>

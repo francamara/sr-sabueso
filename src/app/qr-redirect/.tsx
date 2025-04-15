@@ -1,5 +1,5 @@
 // app/qr-redirect/QrRedirectClient.tsx
-'use client'
+"use client";
 
 import Image from "next/image";
 import { Bungee } from "next/font/google";
@@ -53,10 +53,19 @@ export default function QrRedirectClient() {
   }, [product]);
 
   return (
-    <div className={`${bungee.className} w-full h-screen bg-soft_brown-300 flex align-middle justify-center flex-col select-none`}>
+    <div
+      className={`${bungee.className} w-full h-screen bg-soft_brown-300 flex align-middle justify-center flex-col select-none`}
+    >
       <div className="flex align-middle justify-center m-auto">
         <div className="text-center text-dark_moss_green-100">
-          <Image src="/Isotipo.png" className="m-auto" alt="Señor Sabueso" width={180} height={38} priority />
+          <Image
+            src="/Isotipo.png"
+            className="m-auto"
+            alt="Señor Sabueso"
+            width={180}
+            height={38}
+            priority
+          />
           <h1 className="text-4xl font-bold mt-4 text-dark_moss_green-600">Señor Sabueso</h1>
 
           <h2 className="text-dark_moss_green-600 mt-4 text-3xl">

@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import  { randomBytes } from "crypto";
+import { randomBytes } from "crypto";
 import { addMinutes } from "date-fns";
 import { sendVerificationEmail } from "@/lib/mail";
-
 
 const prisma = new PrismaClient();
 
@@ -37,39 +36,36 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
-        data: {
-          email,
-          username,
-          password: hashedPassword,
-          phone_number: null,
-          role: { connect: { id: 1 } },
-        },
-      });
-      
-      console.log("🆕 New user created:", newUser);
+      data: {
+        email,
+        username,
+        password: hashedPassword,
+        phone_number: null,
+        role: { connect: { id: 1 } },
+      },
+    });
 
+    console.log("🆕 New user created:", newUser);
 
-      const token = randomBytes(32).toString("hex");
-      const expires = addMinutes(new Date(), 15); // Token válido por 15 minutos
-      
-      await prisma.verificationToken.create({
-        data: {
-          identifier: email,
-          token,
-          expires,
-        },
-      });
+    const token = randomBytes(32).toString("hex");
+    const expires = addMinutes(new Date(), 15); // Token válido por 15 minutos
 
-      const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
-      await sendVerificationEmail(email, verifyUrl);
-      
-      return NextResponse.json({ user: newUser }, { status: 201 });
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires,
+      },
+    });
 
-    } catch (err) {
-      const error = err as Error
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      console.error("🔥 Unexpected error in /api/register:", errorMessage);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-    }
-    
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
+    await sendVerificationEmail(email, verifyUrl);
+
+    return NextResponse.json({ user: newUser }, { status: 201 });
+  } catch (err) {
+    const error = err as Error;
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("🔥 Unexpected error in /api/register:", errorMessage);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

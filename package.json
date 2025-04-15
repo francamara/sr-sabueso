@@ -6,9 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "npx prisma migrate deploy && prisma generate && npm install && next build",
     "start": "next start",
-    "lint": "next lint",
     "dbseed": "npx tsx prisma/seed.ts",
-    "forcedeploy": "git commit --allow-empty -m \\\"🔄 Force deploy\\\" && git push"
+    "forcedeploy": "git commit --allow-empty -m \\\"🔄 Force deploy\\\" && git push",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
@@ -46,7 +47,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
     "postcss": "^8",
+    "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5"
