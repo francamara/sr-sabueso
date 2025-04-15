@@ -100,9 +100,10 @@ export async function POST(req: Request) {
         animal: { connect: { id: animal_id } },
         productLine: { connect: { id: product_line_id } },
         animalAge: { connect: { id: animal_age_id } },
-        ...(animal_size_id ? { animalSize: { connect: { id: animal_size_id } } } : {}),
+        ...(animal_size_id ? { animalSizes: { connect: [{ id: animal_size_id }] } } : {}),
       },
     });
+    
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
