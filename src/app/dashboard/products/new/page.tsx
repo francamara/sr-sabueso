@@ -109,7 +109,12 @@ export default function NewProductPage() {
 
   useEffect(() => {
     const sku = generateSKU();
-    setFormData((prev) => ({ ...prev, sku }));
+    setFormData((prev) => {
+      if (prev.sku !== sku) {
+        return { ...prev, sku };
+      }
+      return prev;
+    });
   }, [generateSKU]);
 
   const fetchData = async () => {
