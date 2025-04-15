@@ -5,11 +5,14 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
+// Tipos
+
 type Brand = { id: number; name: string };
 type Line = { id: number; name: string; brand_id: number };
 type Animal = { id: number; name: string };
 type AnimalAge = { id: number; name: string };
 type AnimalSize = { id: number; name: string };
+type SubProductLine = { id: number; name: string; productLineId: number };
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -18,12 +21,14 @@ export default function NewProductPage() {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [animalAges, setAnimalAges] = useState<AnimalAge[]>([]);
   const [animalSizes, setAnimalSizes] = useState<AnimalSize[]>([]);
+  const [subProductLines, setSubProductLines] = useState<SubProductLine[]>([]);
 
   const [filteredLines, setFilteredLines] = useState<Line[]>([]);
+  const [filteredSubProductLines, setFilteredSubProductLines] = useState<SubProductLine[]>([]);
+
   const [barcodeChecked, setBarcodeChecked] = useState(false);
   const [barcodeError, setBarcodeError] = useState("");
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -36,20 +41,13 @@ export default function NewProductPage() {
     sku: "",
     brand_id: "",
     line_id: "",
+    sub_product_line_id: "",
     animal_id: "",
     animal_age_id: "",
     animal_size_id: "",
   });
 
   const generateSKU = useCallback(() => {
-    if (
-      brands.length === 0 ||
-      lines.length === 0 ||
-      animals.length === 0 ||
-      animalAges.length === 0
-    )
-      return "";
-
     const brand = brands.find((b) => b.id === parseInt(formData.brand_id));
     const line = lines.find((l) => l.id === parseInt(formData.line_id));
     const animal = animals.find((a) => a.id === parseInt(formData.animal_id));
@@ -83,20 +81,7 @@ export default function NewProductPage() {
     if (extra) sku += `-E`;
 
     return sku;
-  }, [
-    brands,
-    lines,
-    animals,
-    animalAges,
-    animalSizes,
-    formData.brand_id,
-    formData.line_id,
-    formData.animal_id,
-    formData.animal_age_id,
-    formData.animal_size_id,
-    formData.weight,
-    formData.extra_weight,
-  ]);
+  }, [brands, lines, animals, animalAges, animalSizes, formData]);
 
   useEffect(() => {
     fetchData();
@@ -112,8 +97,18 @@ export default function NewProductPage() {
   }, [formData.brand_id, lines]);
 
   useEffect(() => {
+    if (formData.line_id) {
+      const filtered = subProductLines.filter(
+        (sub) => sub.productLineId === parseInt(formData.line_id)
+      );
+      setFilteredSubProductLines(filtered);
+    } else {
+      setFilteredSubProductLines([]);
+    }
+  }, [formData.line_id, subProductLines]);
+
+  useEffect(() => {
     const sku = generateSKU();
-    console.log("SKU generado:", sku); // 👈 Agregá esto
     setFormData((prev) => ({ ...prev, sku }));
   }, [generateSKU]);
 
@@ -125,6 +120,7 @@ export default function NewProductPage() {
       setAnimals(res.data.animals);
       setAnimalAges(res.data.animalAges);
       setAnimalSizes(res.data.animalSizes);
+      setSubProductLines(res.data.subProductLines);
     } catch (error) {
       console.error("Error cargando datos:", error);
     }
@@ -132,7 +128,6 @@ export default function NewProductPage() {
 
   const checkBarcode = async () => {
     if (!formData.barcode) return;
-
     setIsCheckingBarcode(true);
     setBarcodeError("");
     setBarcodeChecked(false);
@@ -157,7 +152,7 @@ export default function NewProductPage() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "brand_id" ? { line_id: "" } : {}),
+      ...(name === "brand_id" ? { line_id: "", sub_product_line_id: "" } : {}),
     }));
   };
 
@@ -173,7 +168,10 @@ export default function NewProductPage() {
         wholesale_price: parseFloat(formData.wholesale_price),
         stock: parseInt(formData.stock),
         brand_id: parseInt(formData.brand_id),
-        product_line_id: formData.line_id ? parseInt(formData.line_id) : null,
+        product_line_id: parseInt(formData.line_id),
+        sub_product_line_id: formData.sub_product_line_id
+          ? parseInt(formData.sub_product_line_id)
+          : undefined,
         animal_id: parseInt(formData.animal_id),
         animal_age_id: parseInt(formData.animal_age_id),
         animal_size_id: formData.animal_size_id ? parseInt(formData.animal_size_id) : null,
@@ -247,6 +245,15 @@ export default function NewProductPage() {
           onChange={handleChange}
           options={filteredLines}
           disabled={!formData.brand_id || !barcodeChecked}
+        />
+        <SelectField
+          label="Sub Línea (opcional)"
+          name="sub_product_line_id"
+          value={formData.sub_product_line_id}
+          onChange={handleChange}
+          options={filteredSubProductLines}
+          allowEmpty
+          disabled={!formData.line_id || !barcodeChecked}
         />
         <SelectField
           label="Animal"
@@ -326,16 +333,7 @@ export default function NewProductPage() {
   );
 }
 
-type SelectFieldProps = {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { id: number; name: string }[];
-  allowEmpty?: boolean;
-  disabled?: boolean;
-};
-
+// Reutilizable
 function SelectField({
   label,
   name,
@@ -344,7 +342,7 @@ function SelectField({
   options,
   allowEmpty = false,
   disabled = false,
-}: SelectFieldProps) {
+}: any) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm font-semibold mb-1">
@@ -361,7 +359,7 @@ function SelectField({
       >
         {allowEmpty && <option value="">Sin especificar</option>}
         {!allowEmpty && <option value="">Seleccionar {label.toLowerCase()}</option>}
-        {options.map((opt) => (
+        {options.map((opt: any) => (
           <option key={opt.id} value={opt.id}>
             {opt.name}
           </option>

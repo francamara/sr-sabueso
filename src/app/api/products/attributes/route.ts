@@ -6,6 +6,12 @@ export async function GET() {
     const brands = await prisma.brand.findMany({ orderBy: { name: "asc" } });
     const animals = await prisma.animal.findMany({ orderBy: { name: "asc" } });
     const lines = await prisma.productLine.findMany({ orderBy: { name: "asc" } });
+
+    const subProductLines = await prisma.subProductLine.findMany({
+      orderBy: { name: "asc" },
+      include: { productLine: true }, // 🧩 incluye la línea asociada
+    });
+
     const animalAges = await prisma.animalAge.findMany({ orderBy: { name: "asc" } });
     const animalSizes = await prisma.animalSize.findMany({ orderBy: { name: "asc" } });
 
@@ -13,6 +19,7 @@ export async function GET() {
       brands,
       animals,
       lines,
+      subProductLines,
       animalAges,
       animalSizes,
     });
