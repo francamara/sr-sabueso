@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "npx prisma migrate deploy && prisma generate && npm install && next build",
     "start": "next start",
     "dbseed": "npx tsx prisma/seed.ts",
