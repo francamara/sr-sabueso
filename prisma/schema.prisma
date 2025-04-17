@@ -8,54 +8,52 @@ datasource db {
 }
 
 model Role {
-  id     Int     @id @default(autoincrement())
-  name   String  @unique
-  users  User[]
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
 }
 
 model Account {
-  id                Int       @id @default(autoincrement())
-  userId            Int
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?   @db.Text
-  access_token      String?   @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?   @db.Text
-  session_state     String?
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  Int     @id @default(autoincrement())
+  type                String
+  provider            String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  provider_account_id String
+  user_id             Int
+  user                User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, provider_account_id])
 }
 
 model Session {
-  id           Int      @id @default(autoincrement())
-  sessionToken String   @unique
-  userId       Int
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  expires       DateTime
+  session_token String   @unique
+  user_id       Int
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id           Int             @id @default(autoincrement())
-  username     String          @unique
-  phone_number String?         @unique
-  role_id      Int
-  role         Role            @relation(fields: [role_id], references: [id])
-  addresses    UserAddress[]
-  orders       Order[]
-  stockMovements StockMovement[]
-  password     String?
-  created_at   DateTime        @default(now())
-
-  email         String?   @unique
-  emailVerified DateTime?
-
-  accounts      Account[]
-  sessions      Session[]
+  id              Int             @id @default(autoincrement())
+  username        String          @unique
+  phone_number    String?         @unique
+  role_id         Int
+  password        String?
+  created_at      DateTime        @default(now())
+  email           String?         @unique
+  email_verified  DateTime?
+  accounts        Account[]
+  orders          Order[]
+  sessions        Session[]
+  stock_movements StockMovement[]
+  role            Role            @relation(fields: [role_id], references: [id])
+  addresses       UserAddress[]
 }
 
 model VerificationToken {
@@ -69,10 +67,10 @@ model VerificationToken {
 model UserAddress {
   id         Int      @id @default(autoincrement())
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
   address    String
   created_at DateTime @default(now())
   orders     Order[]
+  user       User     @relation(fields: [user_id], references: [id])
 }
 
 model Animal {
@@ -80,29 +78,30 @@ model Animal {
   name     String    @unique
   products Product[]
 }
+
 model Brand {
-  id            Int            @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   name          String
   products      Product[]
-  productLines  ProductLine[]
+  product_lines ProductLine[]
 }
 
 model ProductLine {
-  id        Int     @id @default(autoincrement())
-  name      String
-  brand_id  Int
-  brand     Brand   @relation(fields: [brand_id], references: [id])
-  products  Product[]
-  subProductLines SubProductLine[]
-}
-model SubProductLine {
-  id            Int           @id @default(autoincrement())
-  name          String
-  productLineId Int
-  productLine   ProductLine   @relation(fields: [productLineId], references: [id])
-  products      Product[]
+  id                Int              @id @default(autoincrement())
+  name              String
+  brand_id          Int
+  products          Product[]
+  brand             Brand            @relation(fields: [brand_id], references: [id])
+  sub_product_lines SubProductLine[]
 }
 
+model SubProductLine {
+  id              Int         @id @default(autoincrement())
+  name            String
+  product_line_id Int         @default(1)
+  products        Product[]
+  product_line    ProductLine @relation(fields: [product_line_id], references: [id])
+}
 
 model AnimalAge {
   id       Int       @id @default(autoincrement())
@@ -113,73 +112,71 @@ model AnimalAge {
 model AnimalSize {
   id       Int       @id @default(autoincrement())
   name     String    @unique
-  products Product[]
+  products Product[] @relation("AnimalSizeToProduct")
 }
 
 model Product {
-  id               Int             @id @default(autoincrement())
-  brand_id         Int
-  brand            Brand           @relation(fields: [brand_id], references: [id])
-  productLineId    Int
-  productLine      ProductLine     @relation(fields: [productLineId], references: [id])
-  animal_id        Int
-  animal           Animal          @relation(fields: [animal_id], references: [id])
-  animal_age_id    Int
-  animalAge        AnimalAge       @relation(fields: [animal_age_id], references: [id])
-  animalSizes      AnimalSize[]
-  description      String
-  sku              String          @unique
-  barcode          String          @unique
-  stock            Int
-  retail_price     Float
-  wholesale_price  Float
-  weight           Float
-  extra_weight     Float
-  created_at       DateTime        @default(now())
-  updated_at       DateTime        @updatedAt
-  is_deleted       Boolean         @default(false)
-  orderItems       OrderItem[]
-  productImages    ProductImage[]
-  priceHistory     PriceHistory[]
-  stockMovements   StockMovement[]
-  subProductLineId Int?
-  subProductLine   SubProductLine? @relation(fields: [subProductLineId], references: [id])
-
+  id                  Int             @id @default(autoincrement())
+  brand_id            Int
+  animal_id           Int
+  animal_age_id       Int
+  description         String
+  sku                 String          @unique
+  barcode             String          @unique
+  stock               Int
+  retail_price        Float
+  wholesale_price     Float
+  weight              Float
+  extra_weight        Float
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+  is_deleted          Boolean         @default(false)
+  product_line_id     Int             @default(1)
+  sub_product_line_id Int?
+  order_items         OrderItem[]
+  price_history       PriceHistory[]
+  animal_age          AnimalAge       @relation(fields: [animal_age_id], references: [id])
+  animal              Animal          @relation(fields: [animal_id], references: [id])
+  brand               Brand           @relation(fields: [brand_id], references: [id])
+  product_line        ProductLine     @relation(fields: [product_line_id], references: [id])
+  sub_product_line    SubProductLine? @relation(fields: [sub_product_line_id], references: [id])
+  product_images      ProductImage[]
+  stock_movements     StockMovement[]
+  animal_sizes        AnimalSize[]    @relation("AnimalSizeToProduct")
 }
-
 
 model Distributor {
   id            Int            @id @default(autoincrement())
   name          String
-  priceHistory  PriceHistory[]
+  price_history PriceHistory[]
 }
 
 model PriceType {
   id            Int            @id @default(autoincrement())
   name          String
-  priceHistory  PriceHistory[]
+  price_history PriceHistory[]
 }
 
 model PriceHistory {
-  id              Int         @id @default(autoincrement())
-  product_id      Int
-  distributor_id  Int
-  price_type_id   Int
-  product         Product     @relation(fields: [product_id], references: [id])
-  distributor     Distributor @relation(fields: [distributor_id], references: [id])
-  priceType       PriceType   @relation(fields: [price_type_id], references: [id])
-  price           Float
-  changed_at      DateTime    @default(now())
-  is_deleted      Boolean     @default(false)
+  id             Int         @id @default(autoincrement())
+  product_id     Int
+  distributor_id Int
+  price_type_id  Int
+  price          Float
+  changed_at     DateTime    @default(now())
+  is_deleted     Boolean     @default(false)
+  distributor    Distributor @relation(fields: [distributor_id], references: [id])
+  price_type     PriceType   @relation(fields: [price_type_id], references: [id])
+  product        Product     @relation(fields: [product_id], references: [id])
 }
 
 model ProductImage {
   id         Int      @id @default(autoincrement())
   product_id Int
-  product    Product  @relation(fields: [product_id], references: [id])
   url        String
   alt_text   String
   created_at DateTime @default(now())
+  product    Product  @relation(fields: [product_id], references: [id])
 }
 
 model OrderStatus {
@@ -189,17 +186,17 @@ model OrderStatus {
 }
 
 model Order {
-  id              Int           @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   user_id         Int
   address_id      Int
   order_status_id Int
-  user            User          @relation(fields: [user_id], references: [id])
-  address         UserAddress   @relation(fields: [address_id], references: [id])
-  status          OrderStatus   @relation(fields: [order_status_id], references: [id])
-  items           OrderItem[]
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
   delivery        Delivery?
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
+  address         UserAddress @relation(fields: [address_id], references: [id])
+  status          OrderStatus @relation(fields: [order_status_id], references: [id])
+  user            User        @relation(fields: [user_id], references: [id])
+  order_items     OrderItem[]
 }
 
 model OrderItem {
@@ -213,18 +210,18 @@ model OrderItem {
 }
 
 model Delivery {
-  id           Int     @id @default(autoincrement())
-  order_id     Int     @unique
-  order        Order   @relation(fields: [order_id], references: [id])
+  id           Int      @id @default(autoincrement())
+  order_id     Int      @unique
   delivered_at DateTime
   status       String
   notes        String
+  order        Order    @relation(fields: [order_id], references: [id])
 }
 
 model MovementType {
-  id               Int              @id @default(autoincrement())
-  name             String
-  stockMovements   StockMovement[]
+  id              Int             @id @default(autoincrement())
+  name            String
+  stock_movements StockMovement[]
 }
 
 model StockMovement {
@@ -235,7 +232,7 @@ model StockMovement {
   change           Int
   reference_id     Int
   created_at       DateTime     @default(now())
+  movement_type    MovementType @relation(fields: [movement_type_id], references: [id])
   product          Product      @relation(fields: [product_id], references: [id])
   user             User         @relation(fields: [user_id], references: [id])
-  movementType     MovementType @relation(fields: [movement_type_id], references: [id])
 }
