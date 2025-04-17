@@ -160,6 +160,7 @@ export default function Brands() {
             />
           ) : (
             <select
+              title="Seleccionar marca"
               value={selectedBrandId}
               onChange={(e) => setSelectedBrandId(e.target.value)}
               className="w-full px-3 py-2 border border-dark_moss_green-200 rounded-md"
@@ -198,6 +199,7 @@ export default function Brands() {
             {brandLines.map((line) => (
               <div key={line.id} className="flex items-center gap-4 mb-2">
                 <input
+                  title="Seleccionar Linea"
                   type="text"
                   value={line.id}
                   disabled={!editingLines[line.id]}
@@ -205,6 +207,7 @@ export default function Brands() {
                   className="w-1/4 px-2 py-1 border border-dark_moss_green-200 rounded-md"
                 />
                 <input
+                  title="Seleccionar linea"
                   type="text"
                   value={line.name}
                   disabled={!editingLines[line.id]}
