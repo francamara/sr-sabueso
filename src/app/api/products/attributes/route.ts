@@ -9,7 +9,7 @@ export async function GET() {
 
     const subProductLines = await prisma.subProductLine.findMany({
       orderBy: { name: "asc" },
-      include: { productLine: true }, // 🧩 incluye la línea asociada
+      include: { product_line: true }, // 🧩 incluye la línea asociada
     });
 
     const animalAges = await prisma.animalAge.findMany({ orderBy: { name: "asc" } });

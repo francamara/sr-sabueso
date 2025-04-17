@@ -54,8 +54,8 @@ export async function PUT(
         stock,
         brand: { connect: { id: brand_id } },
         animal: { connect: { id: animal_id } },
-        productLine: { connect: { id: product_line_id } },
-        animalAge: { connect: { id: animal_age_id } },
+        product_line: { connect: { id: product_line_id } },
+        animal_age: { connect: { id: animal_age_id } },
         ...(animal_size_id ? { animalSize: { connect: { id: animal_size_id } } } : {}),
       },
     });
