@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         animal: { connect: { id: animal_id } },
         product_line: { connect: { id: product_line_id } },
         animal_age: { connect: { id: animal_age_id } },
-        ...(animal_size_id ? { animalSizes: { connect: [{ id: animal_size_id }] } } : {}),
+        ...(animal_size_id ? { animal_sizes: { connect: [{ id: animal_size_id }] } } : {}),
         ...(sub_product_line_id
           ? { subProductLine: { connect: { id: sub_product_line_id } } }
           : {}),
