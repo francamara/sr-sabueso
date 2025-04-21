@@ -25,7 +25,7 @@ docker compose up -d
 ## DB Migrate
 
 ```
-npx prisma migrate
+npx prisma migrate dev
 ```
 
 ## DB Seed
