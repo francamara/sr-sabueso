@@ -22,6 +22,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 docker compose up -d
 ```
 
+## DB Migrate
+
+```
+npx prisma migrate
+```
+
 ## DB Seed
 
 ```
