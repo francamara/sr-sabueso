@@ -2,7 +2,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```
+npm install
+```
+
+Then:
 
 ```bash
 npm run dev
@@ -10,7 +16,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## DB Deploy (Docker)
+
+```
+docker compose up -d
+```
+
 ## DB Seed
+
+```
+npx tsx prisma/seed.ts
+```
 
 This will apply the following content for development purposes
 Roles (admin)
@@ -20,7 +36,3 @@ Animal (perro, gato)
 AnimalAge (cachorro, adulto, senior)
 
 AnimalSize (pequeño, mediano, grande)
-
-```
-npx tsx prisma/seed.ts
-```
