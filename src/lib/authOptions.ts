@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.username,
           role: user.role?.name ?? "client",
-          emailVerified: user.email_verified ?? null,
+          emailVerified: user.email_verified ?? false,
         };
       },
     }),
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.emailVerified = (user as any).email_verified ?? false; //casteado feo porque typescript es un lloron y no sabe que el modelo incluye email_verified
+        token.emailVerified = user.emailVerified ?? false;
       }
       return token;
     },
@@ -53,6 +53,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.emailVerified = token.emailVerified ?? false;
       }
       return session;
     },
