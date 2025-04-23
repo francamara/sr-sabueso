@@ -10,8 +10,18 @@ export default async function DashboardLayout({
 }>) {
   const session = await auth();
 
-  if (!session?.user) {
+  // 1) Si no hay sesión → login
+  if (!session) {
     redirect("/login");
+  }
+
+  // 2) Si no verificó su email → check-email
+  if (!session.user.emailVerified) {
+    redirect("/check-email");
+  }
+  // 3) Si no es admin → forbidden
+  if (session.user.role !== "admin") {
+    redirect("/403");
   }
 
   return (

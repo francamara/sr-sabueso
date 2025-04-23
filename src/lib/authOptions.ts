@@ -1,4 +1,4 @@
-// lib/auth.ts
+// src/lib/authOptions.ts
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -14,28 +14,38 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Usuario", type: "text" },
+        email: { label: "Email", type: "text" },
         password: { label: "Contraseña", type: "password" },
       },
+      /**
+       * authorize debe devolver User | null
+       */
       async authorize(credentials) {
-        if (!credentials?.username || !credentials.password) return null;
+        if (!credentials?.email || !credentials.password) {
+          return null;
+        }
 
         const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
+          where: { email: credentials.email },
           include: { role: true },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password) {
+          return null;
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        if (!isValid) {
+          return null;
+        }
 
+        // ¡Importante! Devuelve este objeto con las propiedades User que NextAuth espera
         return {
           id: user.id.toString(),
-          email: user.email,
           name: user.username,
+          email: user.email,
           role: user.role?.name ?? "client",
-          emailVerified: user.email_verified ?? null,
+          emailVerified: !!user.email_verified,
         };
       },
     }),
@@ -43,9 +53,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.emailVerified = (user as any).email_verified ?? false; //casteado feo porque typescript es un lloron y no sabe que el modelo incluye email_verified
+        token.id = (user as any).id;
+        token.role = (user as any).role;
+        token.emailVerified = (user as any).emailVerified;
       }
       return token;
     },
@@ -53,12 +63,13 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.emailVerified = token.emailVerified as boolean;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login", // Redirección personalizada si el login falla
+    signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

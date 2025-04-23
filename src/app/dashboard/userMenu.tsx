@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { LogOut, User } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,14 +44,17 @@ export default function UserMenu() {
             <span>Mi Perfil</span>
           </Link>
           <div className="border-t border-gray-100 my-1"></div>
-          <Link
-            href="/auth/logout"
+          <div
             className="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
-            onClick={() => setIsOpen(false)}
+            onClick={() =>
+              signOut({
+                callbackUrl: "/login",
+              })
+            }
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Cerrar Sesión</span>
-          </Link>
+          </div>
         </div>
       )}
     </div>
