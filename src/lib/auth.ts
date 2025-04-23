@@ -1,38 +1,37 @@
+// src/lib/auth.ts
 import { getServerSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-// Configuración de NextAuth
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials.password) return null;
+        if (!credentials?.email || !credentials.password) return null;
 
         const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
+          where: { email: credentials.email },
           include: { role: true },
         });
-
         if (!user || !user.password) return null;
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-
         if (!isValid) return null;
 
         return {
           id: user.id.toString(),
           email: user.email,
-          username: user.username,
+          name: user.username,
           role: user.role?.name || "client",
+          emailVerified: !!user.email_verified,
         };
       },
     }),
@@ -43,8 +42,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        token.id = (user as any).id;
+        token.role = (user as any).role;
+        token.emailVerified = (user as any).emailVerified;
       }
       return token;
     },
@@ -52,16 +52,18 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.emailVerified = token.emailVerified as boolean;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login", // Página personalizada de login
+    signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+/** Helper para obtener sesión en el servidor */
 export async function auth() {
   return await getServerSession(authOptions);
 }

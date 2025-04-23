@@ -14,7 +14,7 @@ const bungee = Bungee({
 });
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     const res = await signIn("credentials", {
       redirect: false,
-      username,
+      email,
       password,
     });
 
@@ -36,10 +36,11 @@ export default function LoginPage() {
     if (res?.ok) {
       router.push("/dashboard");
     } else {
-      setError(res?.error || "Usuario o contraseña incorrectos");
+      setError(res?.error || "Email o contraseña incorrectos");
     }
   };
 
+  // Si viene callbackUrl (por ejemplo después de un signIn forzado), limpiamos la URL
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.has("callbackUrl")) {
@@ -58,14 +59,14 @@ export default function LoginPage() {
         <h1 className="text-3xl text-center text-dark_moss_green-400 mb-6">Iniciar Sesión</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-dark_moss_green-400 mb-1">
-              Usuario
+            <label htmlFor="email" className="block text-dark_moss_green-400 mb-1">
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-dark_moss_green-400 rounded focus:outline-none focus:ring-2 focus:ring-office_green-500"
               required
             />
@@ -76,14 +77,16 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
-              value={password}
               id="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-dark_moss_green-400 rounded focus:outline-none focus:ring-2 focus:ring-office_green-500"
               required
             />
           </div>
+
           {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <Button type="submit" loading={isLoading} className="w-full">
             Iniciar Sesión
           </Button>
