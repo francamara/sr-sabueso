@@ -19,7 +19,6 @@ export default async function DashboardLayout({
   if (!session.user.emailVerified) {
     redirect("/check-email");
   }
-  console.log(session.user.role);
   // 3) Si no es admin → forbidden
   if (session.user.role !== "admin") {
     redirect("/403");

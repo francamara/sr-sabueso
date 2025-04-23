@@ -49,7 +49,6 @@ export default function Brands() {
     try {
       const res = await axios.get(`/api/brands/${brandId}`);
       // Se espera que el endpoint devuelva { lines: [...] }
-      console.log(res.data);
       setBrandLines(res.data.brand.product_lines);
     } catch (error) {
       console.error("Error fetching brand lines:", error);
@@ -83,7 +82,6 @@ export default function Brands() {
           name: newBrandName,
         });
         const created = res.data; // { id, name }
-        console.log("Marca creada:", created);
         setBrands((prev) => [...prev, created]);
         setIsAddingBrand(false);
         setSelectedBrandId(String(created.id));
@@ -97,7 +95,6 @@ export default function Brands() {
         setIsSaving(false);
       }
     } else {
-      console.log("Se seleccionó la marca con ID:", selectedBrandId);
       setSuccessMessage("Marca seleccionada correctamente");
       setTimeout(() => setSuccessMessage(""), 3000);
       setIsSaving(false);
@@ -135,7 +132,6 @@ export default function Brands() {
       const res = await axios.put(`/api/products/brands/${selectedBrandId}/lines`, {
         lines: brandLines,
       });
-      console.log("Brand lines actualizados:", res.data);
       setSuccessMessage("Brand lines actualizados con éxito");
       setEditingLines({});
       setTimeout(() => setSuccessMessage(""), 3000);

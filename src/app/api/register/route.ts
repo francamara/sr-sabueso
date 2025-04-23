@@ -10,7 +10,6 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    console.log("🔍 Raw body received:", rawBody);
 
     let body;
     try {
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
     }
 
     const { email, username, password } = body;
-    console.log("📦 Parsed body:", { email, username, password });
 
     if (!email || !username || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -44,8 +42,6 @@ export async function POST(req: Request) {
         role: { connect: { id: 1 } },
       },
     });
-
-    console.log("🆕 New user created:", newUser);
 
     const token = randomBytes(32).toString("hex");
     const expires = addMinutes(new Date(), 15); // Token válido por 15 minutos
