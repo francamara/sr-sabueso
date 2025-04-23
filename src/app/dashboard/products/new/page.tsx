@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { generateSKU, SKUData } from "@/app/utils/utils";
 
 /* ---------- Tipos ---------- */
 
@@ -54,32 +55,14 @@ export default function NewProductPage() {
   });
 
   /* ---------- Generadores ---------- */
-  const generateSKU = useCallback(() => {
-    const brand = brands.find((b) => b.id === +formData.brand_id);
-    const line = lines.find((l) => l.id === +formData.line_id);
-    const animal = animals.find((a) => a.id === +formData.animal_id);
-    const age = animalAges.find((a) => a.id === +formData.animal_age_id);
-    const size = animalSizes.find((s) => s.id === +formData.animal_size_id);
-    const weight = formData.weight;
-    const extra = !!formData.extra_weight && parseFloat(formData.extra_weight) > 0;
-
-    const getInitials = (s: string) =>
-      s
-        .split(" ")
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
-
-    const parts = [
-      brand ? getInitials(brand.name) : null,
-      line ? getInitials(line.name) : null,
-      animal || age || size
-        ? `${animal ? getInitials(animal.name) : ""}${age ? getInitials(age.name) : ""}${size ? getInitials(size.name) : ""}`
-        : null,
-      weight ? `${weight}` : null,
-    ].filter(Boolean as any);
-
-    return parts.join("-") + (extra ? "-E" : "");
-  }, [brands, lines, animals, animalAges, animalSizes, formData]);
+  const sku: string = generateSKU(
+    formData as SKUData,
+    brands,
+    lines,
+    animals,
+    animalAges,
+    animalSizes
+  );
 
   const generateDescription = useCallback(() => {
     const brand = brands.find((b) => b.id === +formData.brand_id);
@@ -141,7 +124,6 @@ export default function NewProductPage() {
 
   /* ---------- recalcular SKU & descripción ---------- */
   useEffect(() => {
-    const sku = generateSKU();
     const description = generateDescription();
     setFormData((prev) => {
       if (prev.sku !== sku || prev.description !== description) {
