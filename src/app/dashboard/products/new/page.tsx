@@ -2,18 +2,26 @@
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { generateSKU, SKUData } from "@/app/utils/utils";
+import { MovementTypeEnum } from "@/types/movementType";
 
 /* ---------- Tipos ---------- */
-
 type Brand = { id: number; name: string };
 type Line = { id: number; name: string; brand_id: number };
 type Animal = { id: number; name: string };
 type AnimalAge = { id: number; name: string };
 type AnimalSize = { id: number; name: string };
 type SubProductLine = { id: number; name: string; productLineId: number };
+
+/* ---------- Opciones de movimiento ---------- */
+const movementTypeOptions = [
+  { id: MovementTypeEnum.PURCHASE_IN, name: "Ingreso compra" },
+  { id: MovementTypeEnum.ADJUST_PLUS, name: "Ajuste +" },
+  { id: MovementTypeEnum.ADJUST_MINUS, name: "Ajuste –" },
+  { id: MovementTypeEnum.RETURN_IN, name: "Devolución" },
+];
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -36,6 +44,10 @@ export default function NewProductPage() {
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  /* ---------- productId ---------- */
+  const { id: productId } = useParams<{ id?: string }>();
+  const isEdit = !!productId;           // true = editando, false = creando
+
   /* ---------- form ---------- */
   const [formData, setFormData] = useState({
     barcode: "",
@@ -44,6 +56,7 @@ export default function NewProductPage() {
     retail_price: "",
     wholesale_price: "",
     stock: "",
+    movement_type_id: String(MovementTypeEnum.PURCHASE_IN),
     sku: "",
     description: "",
     brand_id: "",
@@ -74,17 +87,25 @@ export default function NewProductPage() {
 
     if (!brand && !line && !weight) return "";
 
-    return [
-      brand?.name,
-      line?.name,
-      animal?.name,
-      age?.name,
-      size?.name,
-      weight ? `x${weight}kg` : null,
-    ]
+    return [brand?.name, line?.name, animal?.name, age?.name, size?.name, weight ? `x${weight}kg` : null]
       .filter(Boolean as any)
       .join(" ");
   }, [brands, lines, animals, animalAges, animalSizes, formData]);
+
+  /* ---------- helpers ---------- */
+  const createInitialStockMovement = async (
+    productId: number,
+    qty: number,
+    movementTypeId: number,
+  ) => {
+    if (!qty) return;
+    await axios.post("/api/stock-movements", {
+      productId,
+      movementType: movementTypeId,
+      change: qty,
+      referenceId: 0,
+    });
+  };
 
   /* ---------- cargar catálogos ---------- */
   useEffect(() => {
@@ -105,38 +126,29 @@ export default function NewProductPage() {
 
   /* ---------- filtrados dependientes ---------- */
   useEffect(() => {
-    if (formData.brand_id) {
-      setFilteredLines(lines.filter((l) => l.brand_id === +formData.brand_id));
-    } else {
-      setFilteredLines([]);
-    }
+    setFilteredLines(formData.brand_id ? lines.filter(l => l.brand_id === +formData.brand_id) : []);
   }, [formData.brand_id, lines]);
 
   useEffect(() => {
-    if (formData.line_id) {
-      setFilteredSubProductLines(
-        subProductLines.filter((s) => s.productLineId === +formData.line_id)
-      );
-    } else {
-      setFilteredSubProductLines([]);
-    }
+    setFilteredSubProductLines(
+      formData.line_id ? subProductLines.filter(s => s.productLineId === +formData.line_id) : []
+    );
   }, [formData.line_id, subProductLines]);
 
   /* ---------- recalcular SKU & descripción ---------- */
   useEffect(() => {
     const description = generateDescription();
-    setFormData((prev) => {
-      if (prev.sku !== sku || prev.description !== description) {
-        return { ...prev, sku, description };
-      }
-      return prev;
-    });
-  }, [generateSKU, generateDescription]);
+    setFormData(prev =>
+      prev.sku !== sku || prev.description !== description
+        ? { ...prev, sku, description }
+        : prev
+    );
+  }, [generateDescription, sku]);
 
   /* ---------- handlers ---------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
       ...(name === "brand_id" ? { line_id: "", sub_product_line_id: "" } : {}),
@@ -148,15 +160,11 @@ export default function NewProductPage() {
     setIsCheckingBarcode(true);
     setBarcodeError("");
     setBarcodeChecked(false);
+
     try {
       const res = await axios.get(`/api/products/check-barcode?barcode=${formData.barcode}`);
-      if (res.data) {
-        setBarcodeError("Este código de barras ya existe.");
-      } else {
-        setBarcodeChecked(true);
-      }
-    } catch (err) {
-      console.error("Error verificando barcode:", err);
+      res.data ? setBarcodeError("Este código de barras ya existe.") : setBarcodeChecked(true);
+    } catch {
       setBarcodeError("Error al verificar el código de barras.");
     } finally {
       setIsCheckingBarcode(false);
@@ -166,23 +174,36 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     try {
-      await axios.post("/api/products", {
+      const initialStock = parseInt(formData.stock) || 0;
+      const movementTypeId = +formData.movement_type_id;
+
+      if (!isEdit && +formData.movement_type_id !== MovementTypeEnum.PURCHASE_IN) {
+        alert("Para un producto nuevo el tipo de movimiento debe ser 'Ingreso compra'.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      /* 1· Crear producto con stock 0 */
+      const { data: product } = await axios.post("/api/products", {
         ...formData,
+        stock: 0,
         weight: parseFloat(formData.weight),
         extra_weight: formData.extra_weight ? parseFloat(formData.extra_weight) : 0,
         retail_price: parseFloat(formData.retail_price),
         wholesale_price: parseFloat(formData.wholesale_price),
-        stock: parseInt(formData.stock),
         brand_id: +formData.brand_id,
         product_line_id: +formData.line_id,
-        sub_product_line_id: formData.sub_product_line_id
-          ? +formData.sub_product_line_id
-          : undefined,
+        sub_product_line_id: formData.sub_product_line_id ? +formData.sub_product_line_id : undefined,
         animal_id: +formData.animal_id,
         animal_age_id: +formData.animal_age_id,
         animal_size_id: formData.animal_size_id ? +formData.animal_size_id : null,
       });
+
+      /* 2· Movimiento inicial */
+      await createInitialStockMovement(product.id, initialStock, movementTypeId);
+
       router.push("/dashboard/products");
     } catch (err) {
       console.error("Error al crear producto:", err);
@@ -191,6 +212,12 @@ export default function NewProductPage() {
     }
   };
 
+  useEffect(() => {
+    if (!isEdit && +formData.movement_type_id !== MovementTypeEnum.PURCHASE_IN) {
+      setFormData(prev => ({ ...prev, movement_type_id: String(MovementTypeEnum.PURCHASE_IN) }));
+    }
+  }, [isEdit, formData.movement_type_id]);
+
   /* ---------- render ---------- */
   return (
     <div className="w-full h-full flex justify-center items-center text-dark_moss_green-400 px-6">
@@ -198,18 +225,11 @@ export default function NewProductPage() {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-screen-xl bg-white rounded-xl p-8 shadow-lg"
       >
-        <div className="sm:col-span-2 lg:col-span-3 mb-4 flex flex-col lg:flex-row items-start lg:items-center gap-2">
+        {/* Cabecera */}
+        <div className="sm:col-span-2 lg:col-span-3 mb-4 flex flex-col lg:flex-row gap-2">
           <h1 className="text-3xl font-bold">Nuevo Producto</h1>
-
-          {formData.sku && (
-            <span className="text-lg font-mono bg-gray-100 px-3 py-1 rounded">
-              SKU: {formData.sku}
-            </span>
-          )}
-
-          {formData.description && (
-            <span className="text-lg bg-gray-100 px-3 py-1 rounded">{formData.description}</span>
-          )}
+          {formData.sku && <Badge value={`SKU: ${formData.sku}`} mono />}
+          {formData.description && <Badge value={formData.description} />}
         </div>
 
         {/* Barcode */}
@@ -225,7 +245,7 @@ export default function NewProductPage() {
               placeholder="Código de Barras"
               value={formData.barcode}
               onChange={handleChange}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   checkBarcode();
@@ -304,23 +324,26 @@ export default function NewProductPage() {
           { name: "wholesale_price", label: "Precio Mayorista" },
           { name: "stock", label: "Stock" },
         ].map(({ name, label }) => (
-          <div key={name}>
-            <label htmlFor={name} className="block text-sm font-semibold mb-1">
-              {label}
-            </label>
-            <input
-              type="text"
-              id={name}
-              name={name}
-              placeholder={name}
-              value={(formData as any)[name]}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-dark_moss_green-200 rounded-md"
-              disabled={!barcodeChecked}
-              required={name !== "extra_weight"}
-            />
-          </div>
+          <NumericInput
+            key={name}
+            name={name}
+            label={label}
+            value={(formData as any)[name]}
+            onChange={handleChange}
+            disabled={!barcodeChecked}
+            required={name !== "extra_weight"}
+          />
         ))}
+
+        {/* Dropdown de tipo de movimiento */}
+        <SelectField
+          label="Tipo de movimiento"
+          name="movement_type_id"
+          value={formData.movement_type_id}
+          onChange={handleChange}
+          options={movementTypeOptions}
+          disabled={!isEdit}          // solo editable cuando es edición
+        />
 
         {/* Submit */}
         <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-6">
@@ -338,7 +361,7 @@ export default function NewProductPage() {
         </div>
       </form>
 
-      {/* Overlay de Loading barcode */}
+      {/* Overlay de loading barcode */}
       {isCheckingBarcode && (
         <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
           <div className="w-16 h-16 border-4 border-dark_moss_green-400 border-t-transparent rounded-full animate-spin" />
@@ -348,7 +371,50 @@ export default function NewProductPage() {
   );
 }
 
-/* ---------- SelectField reutilizable ---------- */
+/* ---------- Sub-componentes ---------- */
+
+function Badge({ value, mono = false }: { value: string; mono?: boolean }) {
+  return (
+    <span className={`text-lg px-3 py-1 rounded bg-gray-100 ${mono ? "font-mono" : ""}`}>
+      {value}
+    </span>
+  );
+}
+
+function NumericInput({
+  name,
+  label,
+  value,
+  onChange,
+  disabled,
+  required,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className="block text-sm font-semibold mb-1">
+        {label}
+      </label>
+      <input
+        type="text"
+        id={name}
+        name={name}
+        placeholder={label}
+        value={value}
+        onChange={onChange}
+        className="w-full px-3 py-2 border border-dark_moss_green-200 rounded-md"
+        disabled={disabled}
+        required={required}
+      />
+    </div>
+  );
+}
 
 function SelectField({
   label,
@@ -386,7 +452,7 @@ function SelectField({
         ) : (
           <option value="">Seleccionar {label.toLowerCase()}</option>
         )}
-        {options.map((opt) => (
+        {options.map(opt => (
           <option key={opt.id} value={opt.id}>
             {opt.name}
           </option>

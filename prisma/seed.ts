@@ -1,3 +1,4 @@
+import { MovementTypeEnum } from "@/types/movementType";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -8,6 +9,13 @@ async function main() {
   const animals = ["perro", "gato"];
   const animalAges = ["cachorro", "adulto", "senior"];
   const animalSizes = ["pequeño", "mediano", "grande"];
+  const movementTypes = [
+    { id: MovementTypeEnum.PURCHASE_IN, name: "PURCHASE_IN" },
+    { id: MovementTypeEnum.SALE_OUT, name: "SALE_OUT" },
+    { id: MovementTypeEnum.ADJUST_PLUS, name: "ADJUST_PLUS" },
+    { id: MovementTypeEnum.ADJUST_MINUS, name: "ADJUST_MINUS" },
+    { id: MovementTypeEnum.RETURN_IN, name: "RETURN_IN" },
+  ];
 
   // Brand -> líneas
   const brandsWithLines: Record<string, string[]> = {
@@ -75,6 +83,15 @@ async function main() {
         });
       }
     }
+  }
+
+
+  for (const m of movementTypes) {
+    await prisma.movementType.upsert({
+      where: { id: m.id },
+      update: {},
+      create: m,
+    });
   }
 
   console.log("✅ Seed completo: roles, animales, edades, tamaños, brands y líneas");
