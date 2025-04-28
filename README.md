@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## First time running the project? 
+After installing docker and node you can run the following command and have it all set it up!
+```
+docker compose up -d && npx prisma migrate dev && npx tsx prisma/seed.ts && npm run dev
+```
+
+## In case 
+
 ## Getting Started
 
 First, install dependencies:
