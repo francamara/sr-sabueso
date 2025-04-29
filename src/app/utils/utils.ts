@@ -80,9 +80,6 @@ export function generateSKU(
   // 5) Sufijo extra
   const hasExtra = parseFloat(String(extra_weight || "")) > 0;
   let sku = segments.join("-");
-  if (hasExtra) {
-    sku += "-E";
-  }
 
   return sku;
 }
