@@ -33,6 +33,8 @@ export default function NewProductPage() {
   const [animalAges, setAnimalAges] = useState<AnimalAge[]>([]);
   const [animalSizes, setAnimalSizes] = useState<AnimalSize[]>([]);
   const [subProductLines, setSubProductLines] = useState<SubProductLine[]>([]);
+  const [originalStock, setOriginalStock] = useState(0);
+  const [existingId, setExistingId] = useState<number | null>(null);
 
   /* ---------- filtrados ---------- */
   const [filteredLines, setFilteredLines] = useState<Line[]>([]);
@@ -40,7 +42,7 @@ export default function NewProductPage() {
 
   /* ---------- flags ---------- */
   const [barcodeChecked, setBarcodeChecked] = useState(false);
-  const [barcodeError, setBarcodeError] = useState("");
+  const [editWarning, setEditWarning] = useState("");
   const [isCheckingBarcode, setIsCheckingBarcode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -157,40 +159,71 @@ export default function NewProductPage() {
 
   const checkBarcode = async () => {
     if (!formData.barcode) return;
+
     setIsCheckingBarcode(true);
-    setBarcodeError("");
+    setEditWarning("");
     setBarcodeChecked(false);
 
     try {
-      const res = await axios.get(`/api/products/check-barcode?barcode=${formData.barcode}`);
-      res.data ? setBarcodeError("Este código de barras ya existe.") : setBarcodeChecked(true);
+      /* 1. Preguntamos si existe el código */
+      const { data: product } = await axios.get(
+        `/api/products/check-barcode?barcode=${formData.barcode}`
+      );
+
+      if (product) {
+        /* 2. Mostrar mensaje */
+        setEditWarning("Cuidado: vas a editar un producto.");
+
+        setExistingId(product.id);
+        setOriginalStock(product.stock);
+
+        setOriginalStock(product.stock);
+
+        /* 3. Copiar datos al formulario (→ strings) */
+        setFormData(prev => ({
+          ...prev,
+          ...product,
+          weight: String(product.weight),
+          extra_weight: String(product.extra_weight),
+          retail_price: String(product.retail_price),
+          wholesale_price: String(product.wholesale_price),
+          stock: String(product.stock),
+          brand_id: String(product.brand_id),
+          line_id: String(product.product_line_id),
+          sub_product_line_id: product.sub_product_line_id
+            ? String(product.sub_product_line_id)
+            : "",
+          animal_id: String(product.animal_id),
+          animal_age_id: String(product.animal_age_id),
+          /* mantenemos el movement_type fijo */
+          movement_type_id: String(MovementTypeEnum.PURCHASE_IN),
+        }));
+
+        /* 4. Desbloqueamos el resto del formulario */
+        setBarcodeChecked(true);
+      } else {
+        setExistingId(null);
+        setBarcodeChecked(true);
+      }
     } catch {
-      setBarcodeError("Error al verificar el código de barras.");
+      setEditWarning("Error al verificar el código de barras.");
     } finally {
       setIsCheckingBarcode(false);
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const initialStock = parseInt(formData.stock) || 0;
-      const movementTypeId = +formData.movement_type_id;
-
-      if (!isEdit && +formData.movement_type_id !== MovementTypeEnum.PURCHASE_IN) {
-        alert("Para un producto nuevo el tipo de movimiento debe ser 'Ingreso compra'.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      /* 1· Crear producto con stock 0 */
-      const { data: product } = await axios.post("/api/products", {
+      const qty = parseInt(formData.stock) || 0;           // stock final deseado
+      const movementTypeId = +formData.movement_type_id;              // drop-down
+      const body = {
         ...formData,
-        stock: 0,
         weight: parseFloat(formData.weight),
-        extra_weight: formData.extra_weight ? parseFloat(formData.extra_weight) : 0,
+        extra_weight: parseFloat(formData.extra_weight) || 0,
         retail_price: parseFloat(formData.retail_price),
         wholesale_price: parseFloat(formData.wholesale_price),
         brand_id: +formData.brand_id,
@@ -199,18 +232,54 @@ export default function NewProductPage() {
         animal_id: +formData.animal_id,
         animal_age_id: +formData.animal_age_id,
         animal_size_id: formData.animal_size_id ? +formData.animal_size_id : null,
-      });
+      };
 
-      /* 2· Movimiento inicial */
-      await createInitialStockMovement(product.id, initialStock, movementTypeId);
+      /* ---------- CREATE ---------- */
+      if (isEdit) {
+        if (movementTypeId !== MovementTypeEnum.PURCHASE_IN) {
+          alert("Para un producto nuevo el tipo de movimiento debe ser 'Ingreso compra'.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        // 1· Crear con stock = 0
+        const { data: product } = await axios.post("/api/products", {
+          ...body,
+          stock: 0,
+        });
+
+        // 2· Movimiento ingreso compra
+        await createInitialStockMovement(
+          product.id,
+          qty,
+          MovementTypeEnum.PURCHASE_IN
+        );
+      } else {
+        // 1· Actualizar producto existente
+        await axios.put(`/api/products/${body.sku}`, {
+          ...body,
+          stock: qty,
+        });
+
+        // 2· Ajuste de stock si cambió
+        const delta = qty - originalStock;
+        if (delta !== 0) {
+          await createInitialStockMovement(
+            Number(productId),
+            Math.abs(delta),
+            delta > 0 ? MovementTypeEnum.ADJUST_PLUS : MovementTypeEnum.ADJUST_MINUS
+          );
+        }
+      }
 
       router.push("/dashboard/products");
     } catch (err) {
-      console.error("Error al crear producto:", err);
+      console.error("Error guardando producto:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   useEffect(() => {
     if (!isEdit && +formData.movement_type_id !== MovementTypeEnum.PURCHASE_IN) {
@@ -245,6 +314,7 @@ export default function NewProductPage() {
               placeholder="Código de Barras"
               value={formData.barcode}
               onChange={handleChange}
+              disabled={isEdit}
               onKeyDown={e => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -261,7 +331,7 @@ export default function NewProductPage() {
               Verificar
             </button>
           </div>
-          {barcodeError && <p className="text-red-500 text-sm mt-1">{barcodeError}</p>}
+          {editWarning && <p className="text-yellow-500 text-sm mt-1">{editWarning}</p>}
         </div>
 
         {/* Selects */}
@@ -271,7 +341,7 @@ export default function NewProductPage() {
           value={formData.brand_id}
           onChange={handleChange}
           options={brands}
-          disabled={!barcodeChecked}
+          disabled={!barcodeChecked || !isEdit}
         />
         <SelectField
           label="Línea"
@@ -279,7 +349,7 @@ export default function NewProductPage() {
           value={formData.line_id}
           onChange={handleChange}
           options={filteredLines}
-          disabled={!formData.brand_id || !barcodeChecked}
+          disabled={!formData.brand_id || !barcodeChecked || !isEdit}
         />
         <SelectField
           label="Sub Línea (opcional)"
@@ -288,7 +358,7 @@ export default function NewProductPage() {
           onChange={handleChange}
           options={filteredSubProductLines}
           allowEmpty
-          disabled={!formData.line_id || !barcodeChecked}
+          disabled={!formData.line_id || !barcodeChecked || !isEdit}
         />
         <SelectField
           label="Animal"
@@ -296,7 +366,7 @@ export default function NewProductPage() {
           value={formData.animal_id}
           onChange={handleChange}
           options={animals}
-          disabled={!barcodeChecked}
+          disabled={!barcodeChecked || !isEdit}
         />
         <SelectField
           label="Edad del Animal"
@@ -304,7 +374,7 @@ export default function NewProductPage() {
           value={formData.animal_age_id}
           onChange={handleChange}
           options={animalAges}
-          disabled={!barcodeChecked}
+          disabled={!barcodeChecked || !isEdit}
         />
         <SelectField
           label="Tamaño del Animal"
@@ -313,7 +383,7 @@ export default function NewProductPage() {
           onChange={handleChange}
           options={animalSizes}
           allowEmpty
-          disabled={!barcodeChecked}
+          disabled={!barcodeChecked || !isEdit}
         />
 
         {/* Numeric inputs */}
