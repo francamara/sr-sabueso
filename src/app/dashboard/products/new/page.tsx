@@ -69,6 +69,11 @@ export default function NewProductPage() {
     animal_size_id: "",
   });
 
+  const isEditById = !!productId;
+  const isEditByBarcode = existingId !== null;
+
+  const isEditing = isEditById || isEditByBarcode;
+
   /* ---------- Generadores ---------- */
   const sku: string = generateSKU(
     formData as SKUData,
@@ -296,7 +301,9 @@ export default function NewProductPage() {
       >
         {/* Cabecera */}
         <div className="sm:col-span-2 lg:col-span-3 mb-4 flex flex-col lg:flex-row gap-2">
-          <h1 className="text-3xl font-bold">Nuevo Producto</h1>
+          <h1 className="text-3xl font-bold">
+            {isEditing ? "Editar Producto" : "Nuevo Producto"}
+          </h1>
           {formData.sku && <Badge value={`SKU: ${formData.sku}`} mono />}
           {formData.description && <Badge value={formData.description} />}
         </div>
@@ -341,7 +348,7 @@ export default function NewProductPage() {
           value={formData.brand_id}
           onChange={handleChange}
           options={brands}
-          disabled={!barcodeChecked || !isEdit}
+          disabled={!barcodeChecked || !isEditing}
         />
         <SelectField
           label="Línea"
@@ -349,7 +356,7 @@ export default function NewProductPage() {
           value={formData.line_id}
           onChange={handleChange}
           options={filteredLines}
-          disabled={!formData.brand_id || !barcodeChecked || !isEdit}
+          disabled={!formData.brand_id || !barcodeChecked || !isEditing}
         />
         <SelectField
           label="Sub Línea (opcional)"
@@ -358,7 +365,7 @@ export default function NewProductPage() {
           onChange={handleChange}
           options={filteredSubProductLines}
           allowEmpty
-          disabled={!formData.line_id || !barcodeChecked || !isEdit}
+          disabled={!formData.line_id || !barcodeChecked || !isEditing}
         />
         <SelectField
           label="Animal"
@@ -366,7 +373,7 @@ export default function NewProductPage() {
           value={formData.animal_id}
           onChange={handleChange}
           options={animals}
-          disabled={!barcodeChecked || !isEdit}
+          disabled={!barcodeChecked || !isEditing}
         />
         <SelectField
           label="Edad del Animal"
@@ -374,7 +381,7 @@ export default function NewProductPage() {
           value={formData.animal_age_id}
           onChange={handleChange}
           options={animalAges}
-          disabled={!barcodeChecked || !isEdit}
+          disabled={!barcodeChecked || !isEditing}
         />
         <SelectField
           label="Tamaño del Animal"
@@ -383,7 +390,7 @@ export default function NewProductPage() {
           onChange={handleChange}
           options={animalSizes}
           allowEmpty
-          disabled={!barcodeChecked || !isEdit}
+          disabled={!barcodeChecked || !isEditing}
         />
 
         {/* Numeric inputs */}
