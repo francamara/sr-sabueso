@@ -188,6 +188,8 @@ export default function NewOrderPage() {
                 onChange={(e) => handleItemChange(idx, "quantity", e.target.value)}
                 className="w-full px-3 py-2 border border-dark_moss_green-200 rounded-md"
                 required
+                aria-label="Cantidad"
+                placeholder="Cantidad"
               />
             </div>
             <div className="flex justify-end pb-1">
