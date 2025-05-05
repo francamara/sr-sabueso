@@ -9,14 +9,13 @@ export const revalidate = 0;            // refuerza que NO se cachee
    GET /api/users/:id   — devuelve user + addresses
 -------------------------------------------------------------------*/
 export async function GET(
-    _req: NextRequest,
-    context: { params: { id: string } },
+    request: NextRequest,
+    { params }: { params: { id: string } }
 ) {
-    const userId = Number(context.params.id);
+    const userId = Number(params.id)
     if (Number.isNaN(userId)) {
-        return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+        return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
     }
-
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
