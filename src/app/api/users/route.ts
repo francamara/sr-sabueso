@@ -15,7 +15,11 @@ export async function GET() {
                 email: true,
                 role_id: true,
                 phone_number: true,
-                created_at: true, // Date → se serializa como ISO-string automáticamente
+                created_at: true,
+                addresses: {
+                    select: { id: true, address: true, created_at: true },
+                    orderBy: { id: "asc" },
+                },
             },
             orderBy: { id: "asc" },
         });
