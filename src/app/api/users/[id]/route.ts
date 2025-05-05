@@ -9,16 +9,15 @@ export const revalidate = 0;            // refuerza que NO se cachee
    GET /api/users/:id   — devuelve user + addresses
 -------------------------------------------------------------------*/
 export async function GET(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ userId: string }> }
 ) {
-    const userId = Number(params.id)
-    if (Number.isNaN(userId)) {
-        return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
-    }
+
+    const { userId } = await params;
+
     try {
         const user = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: +userId },
             select: {
                 id: true,
                 username: true,
@@ -58,12 +57,9 @@ export async function GET(
 -------------------------------------------------------------------*/
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } },
+    { params }: { params: Promise<{ userId: string }> }
 ) {
-    const userId = Number(params.id);
-    if (Number.isNaN(userId)) {
-        return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const { userId } = await params;
 
     let body: Record<string, unknown>;
     try {
@@ -106,7 +102,7 @@ export async function PUT(
             const user =
                 Object.keys(data).length > 0
                     ? await tx.user.update({
-                        where: { id: userId },
+                        where: { id: +userId },
                         data,
                         select: {
                             id: true,
@@ -122,19 +118,28 @@ export async function PUT(
             /** 2· Reemplaza direcciones si llegaron en el body */
             let addresses;
             if (newAddresses !== undefined) {
+                // parsea userId a número
+                const uid = Number(userId);
+                if (Number.isNaN(uid)) throw new Error('ID inválido');
+
                 // borra todas las viejas
-                await tx.userAddress.deleteMany({ where: { user_id: userId } });
+                await tx.userAddress.deleteMany({ where: { user_id: uid } });
+
                 // crea las nuevas
-                addresses = await tx.userAddress.createMany({
-                    data: newAddresses.map((addr) => ({
-                        user_id: userId,
+                const result = await tx.userAddress.createMany({
+                    data: newAddresses.map(addr => ({
+                        user_id: uid,    // ahora es number, no string
                         address: addr,
                     })),
                     skipDuplicates: true,
                 });
+
+                // createMany devuelve un { count: number }, no los registros
+                console.log(`Se crearon ${result.count} direcciones`);
             }
 
-            return { user, addressesCreated: addresses?.count };
+
+            return { user };
         });
 
         return NextResponse.json(result);
