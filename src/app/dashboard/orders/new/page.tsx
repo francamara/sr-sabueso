@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 /* ---------- Tipos ---------- */
-type User = { id: number; name: string };
+type User = { id: number; username: string };
 type Address = { id: number; user_id: number; full: string };
 type Product = { id: number; description: string; sku: string; retail_price: number };
 type OrderItemForm = { product_id: string; quantity: string };
@@ -34,15 +34,26 @@ export default function NewOrderPage() {
     items: [] as OrderItemForm[],
   });
 
-  /* ---------- cargar usuarios y direcciones ---------- */
+  /* ---------- cargar usuarios ---------- */
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/orders/attributes");
-        setUsers(res.data.users);
-        setAddresses(res.data.addresses);
+        const { data } = await axios.get<User[]>("/api/users");
+        setUsers(data);                      // ✅ User[]
       } catch (err) {
-        console.error("Error cargando usuarios/direcciones:", err);
+        console.error("Error cargando usuarios:", err);
+      }
+    })();
+  }, []);
+
+  /* ---------- cargar direcciones ---------- */
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axios.get<Address[]>("/api/orders/addresses"); // o el que uses
+        setAddresses(data);
+      } catch (err) {
+        console.error("Error cargando direcciones:", err);
       }
     })();
   }, []);
@@ -140,7 +151,7 @@ export default function NewOrderPage() {
           name="user_id"
           value={formData.user_id}
           onChange={handleChange}
-          options={users}
+          options={users.map((u) => ({ id: u.id, name: u.username }))}  // ← ajuste
         />
         <SelectField
           label="Dirección"
