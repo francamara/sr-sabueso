@@ -5,19 +5,21 @@ export interface Role {
   name: string;
 }
 
+export interface Address {
+  id: number;
+  address: string;
+  created_at: string;
+}
+
 export interface User {
   id: number;
   username: string;
-  phone_number: number;
+  email: string | null;
   role_id: number;
-  created_at: Date;
-}
-
-export interface UserAddress {
-  id: number;
-  user_id: number;
-  address: string;
-  created_at: Date;
+  phone_number: string | null;
+  created_at: string;
+  email_verified: string | null;
+  addresses: Address[];
 }
 
 export interface Animal {

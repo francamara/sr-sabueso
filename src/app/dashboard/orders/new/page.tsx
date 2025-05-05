@@ -4,10 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { User } from "@/models";
 
 /* ---------- Tipos ---------- */
-type User = { id: number; name: string };
-type Address = { id: number; user_id: number; full: string };
 type Product = { id: number; description: string; sku: string; retail_price: number };
 type OrderItemForm = { product_id: string; quantity: string };
 
@@ -17,11 +16,7 @@ export default function NewOrderPage() {
 
   /* catálogos */
   const [users, setUsers] = useState<User[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-
-  /* filtrados */
-  const [filteredAddresses, setFilteredAddresses] = useState<Address[]>([]);
 
   /* flags */
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,15 +29,14 @@ export default function NewOrderPage() {
     items: [] as OrderItemForm[],
   });
 
-  /* ---------- cargar usuarios y direcciones ---------- */
+  /* ---------- cargar usuarios ---------- */
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/orders/attributes");
-        setUsers(res.data.users);
-        setAddresses(res.data.addresses);
+        const { data } = await axios.get<User[]>("/api/users");
+        setUsers(data);                      // ✅ User[]
       } catch (err) {
-        console.error("Error cargando usuarios/direcciones:", err);
+        console.error("Error cargando usuarios:", err);
       }
     })();
   }, []);
@@ -59,16 +53,6 @@ export default function NewOrderPage() {
       }
     })();
   }, []);
-
-  /* ---------- filtrados dependientes ---------- */
-  useEffect(() => {
-    if (formData.user_id) {
-      setFilteredAddresses(addresses.filter((a) => a.user_id === +formData.user_id));
-    } else {
-      setFilteredAddresses([]);
-      setFormData((prev) => ({ ...prev, address_id: "" }));
-    }
-  }, [formData.user_id, addresses]);
 
   /* ---------- helpers ---------- */
   const addItem = () =>
@@ -140,17 +124,18 @@ export default function NewOrderPage() {
           name="user_id"
           value={formData.user_id}
           onChange={handleChange}
-          options={users}
+          options={users.map((u) => ({ id: u.id, name: u.username }))}
         />
         <SelectField
           label="Dirección"
           name="address_id"
           value={formData.address_id}
           onChange={handleChange}
-          options={filteredAddresses.map((a) => ({ id: a.id, name: a.full }))}
           disabled={!formData.user_id}
-        />
-
+          options={
+            (users.find(u => +u.id === +formData.user_id)?.addresses || [])
+              .map(addr => ({ id: addr.id, name: addr.address }))
+          } />
         {/* Items header */}
         <div className="sm:col-span-2 lg:col-span-3 flex items-center justify-between mt-6">
           <h2 className="text-xl font-semibold">Items</h2>
@@ -172,7 +157,6 @@ export default function NewOrderPage() {
                 name="product_id"
                 value={item.product_id}
                 onChange={(e) => handleItemChange(idx, "product_id", e.target.value)}
-                /* 👉 mostramos sku + descripción en la opción */
                 options={products.map((p) => ({
                   id: p.id,
                   name: `${p.sku} — ${p.description}`,

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Home, Package, QrCode, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
+import { Menu, X, Home, Package, QrCode, ShoppingCart, ChevronDown, ChevronUp, Users } from "lucide-react";
 import UserMenu from "./userMenu";
 
 /* ---------- Config ---------- */
@@ -28,6 +28,16 @@ const NAV = [
     children: [
       { label: "Ver todos", href: "/dashboard/orders" },
       { label: "Nuevo Pedido", href: "/dashboard/orders/new" },
+    ],
+  },
+  {
+    id: "users",
+    label: "Usuarios",
+    icon: Users,
+    href: "/dashboard/users",
+    children: [
+      { label: "Ver todos", href: "/dashboard/users" },
+      { label: "Nuevo Usuario", href: "/dashboard/users/new" },
     ],
   },
   { id: "qr", label: "Generador de QR", icon: QrCode, href: "/dashboard/qr-generator" },
@@ -71,9 +81,8 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 p-2 rounded-md hover:bg-soft_brown-500 hover:text-old_lace-500 ${
-        active ? "bg-soft_brown-500 font-semibold" : ""
-      }`}
+      className={`flex items-center gap-2 p-2 rounded-md hover:bg-soft_brown-500 hover:text-old_lace-500 ${active ? "bg-soft_brown-500 font-semibold" : ""
+        }`}
       onClick={onClick}
     >
       {Icon && <Icon className="h-5 w-5" />}
@@ -138,11 +147,10 @@ export default function DashboardWrapper({ children }: { children: ReactNode }) 
                 <li key={item.id}>
                   <button
                     onClick={() => toggleMenu(item.id)}
-                    className={`flex justify-between items-center w-full p-2 rounded-md hover:bg-soft_brown-500 hover:text-old_lace-500 ${
-                      pathname.startsWith("/dashboard/products") || pathname === "/dashboard/stock"
-                        ? "bg-soft_brown-500 font-semibold"
-                        : ""
-                    }`}
+                    className={`flex justify-between items-center w-full p-2 rounded-md hover:bg-soft_brown-500 hover:text-old_lace-500 ${pathname.startsWith("/dashboard/products") || pathname === "/dashboard/stock"
+                      ? "bg-soft_brown-500 font-semibold"
+                      : ""
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
