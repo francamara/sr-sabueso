@@ -133,9 +133,6 @@ export async function PUT(
                     })),
                     skipDuplicates: true,
                 });
-
-                // createMany devuelve un { count: number }, no los registros
-                console.log(`Se crearon ${result.count} direcciones`);
             }
 
 
